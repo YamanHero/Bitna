@@ -406,3 +406,41 @@ button:disabled {
 .warn {
   color: var(--danger);
 }
+
+/* בקשות שינוי ותשלומים */
+.badge.cr-approved {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.badge.cr-rejected {
+  background: #fee4e2;
+  color: var(--danger);
+}
+
+.badge.cr-deferred {
+  background: #fef0c7;
+  color: #93370d;
+}
+
+.pf-filter {
+  display: grid;
+  gap: 4px;
+  max-width: 320px;
+  margin: 16px 0 12px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 4px 12px;
+  font-size: 0.9rem;
+}
+
+.checks label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
