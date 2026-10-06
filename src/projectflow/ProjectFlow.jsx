@@ -187,7 +187,7 @@ function ProjectList({ store }) {
           </button>
         </div>
         {!adding && (
-          <button type="button" onClick={() => setAdding(true)}>
+          <button type="button" className="fab" onClick={() => setAdding(true)}>
             פרויקט חדש
           </button>
         )}
@@ -476,6 +476,7 @@ const ICONS = {
   changes: 'M4 7h12m0 0-3-3m3 3-3 3M20 17H8m0 0 3-3m-3 3 3 3',
   payments: 'M3 7h18v10H3zM3 11h18M7 15h3',
   backup: 'M12 4v11m0 0-4-4m4 4 4-4M5 20h14',
+  more: 'M5 12h.01M12 12h.01M19 12h.01',
 };
 
 const NAV = [
@@ -483,10 +484,28 @@ const NAV = [
   ['dashboard', 'לוח בקרה', 'dashboard'],
   ['risks', 'סיכונים', 'risks'],
   ['decisions', 'החלטות', 'decisions'],
-  ['changes', 'בקשות שינוי', 'changes'],
-  ['payments', 'תשלומים', 'payments'],
-  ['backup', 'גיבוי', 'backup'],
+  ['changes', 'בקשות שינוי', 'changes', true],
+  ['payments', 'תשלומים', 'payments', true],
+  ['backup', 'גיבוי', 'backup', true],
 ];
+
+// במסך הטלפון שלוש הלשוניות האחרונות עוברות ללשונית "עוד".
+function More() {
+  return (
+    <>
+      <div className="more-list">
+        {NAV.filter((n) => n[3]).map(([to, label, icon]) => (
+          <Link key={icon} to={`/projectflow/${to}`} className="more-row">
+            <NavIcon name={icon} />
+            <span>{label}</span>
+          </Link>
+        ))}
+      </div>
+      <h2 className="pf-h2">חשבון</h2>
+      <SyncBadge />
+    </>
+  );
+}
 
 function NavIcon({ name }) {
   return (
@@ -500,7 +519,7 @@ export default function ProjectFlow() {
   const store = useProjects();
   const { pathname } = useLocation();
   const section = pathname.replace(/^\/projectflow\/?/, '').split('/')[0];
-  const heading = NAV.find(([to]) => to === section)?.[1];
+  const heading = section === 'more' ? 'עוד' : NAV.find(([to]) => to === section)?.[1];
   return (
     <div className="pf">
       <aside className="pf-side">
@@ -512,14 +531,25 @@ export default function ProjectFlow() {
           </span>
         </Link>
         <nav className="pf-nav" aria-label="ניווט ProjectFlow">
-          {NAV.map(([to, label, icon]) => (
-            <NavLink key={icon} to={to ? `/projectflow/${to}` : '/projectflow'} end={!to}>
+          {NAV.map(([to, label, icon, secondary]) => (
+            <NavLink
+              key={icon}
+              to={to ? `/projectflow/${to}` : '/projectflow'}
+              end={!to}
+              className={secondary ? 'desk-only' : undefined}
+            >
               <NavIcon name={icon} />
               <span>{label}</span>
             </NavLink>
           ))}
+          <NavLink to="/projectflow/more" className="mobile-only">
+            <NavIcon name="more" />
+            <span>עוד</span>
+          </NavLink>
         </nav>
-        <SyncBadge />
+        <div className="side-account">
+          <SyncBadge />
+        </div>
       </aside>
       <main className="pf-main">
         {heading && <h1 className="pf-page">{heading}</h1>}
@@ -531,6 +561,7 @@ export default function ProjectFlow() {
           <Route path="changes" element={<ChangeRequests store={store} />} />
           <Route path="payments" element={<Payments store={store} />} />
           <Route path="backup" element={<Backup store={store} />} />
+          <Route path="more" element={<More />} />
           <Route path=":id" element={<ProjectDetail store={store} />} />
         </Routes>
       </main>
