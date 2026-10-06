@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { markDirty } from '../lib/cloud.js';
 import { RISKS_KEY, exposure, kindLabel } from './registers.js';
 import { currentStage, overallProgress, overdueStages } from './storage.js';
 
@@ -116,6 +117,7 @@ export default function Backup({ store }) {
       }
       if (!window.confirm('הנתונים הנוכחיים בדפדפן זה יוחלפו בנתוני הקובץ. להמשיך?')) return;
       valid.forEach(([k, v]) => localStorage.setItem(k, v));
+      markDirty();
       window.location.reload();
     } catch {
       setMsg({ ok: false, text: 'לא ניתן לקרוא את הקובץ. ודאו שהוא קובץ JSON תקין.' });

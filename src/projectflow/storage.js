@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { persist } from '../lib/cloud.js';
 import { STAGES } from './stages.js';
 
 const KEY = 'projectflow.v1';
@@ -75,12 +76,14 @@ export function useProjects() {
   const [projects, setProjects] = useState(load);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(KEY, JSON.stringify(projects));
-    } catch {
-      /* שמירה מקומית לא זמינה – ממשיכים בלי */
-    }
+    persist(KEY, projects);
   }, [projects]);
+
+  useEffect(() => {
+    const reload = () => setProjects(load());
+    window.addEventListener('pf:data', reload);
+    return () => window.removeEventListener('pf:data', reload);
+  }, []);
 
   const add = useCallback((p) => setProjects((ps) => [p, ...ps]), []);
   const update = useCallback(

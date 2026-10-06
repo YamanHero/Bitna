@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Link, NavLink, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import { Link, NavLink, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { SyncBadge } from '../lib/AuthGate.jsx';
 import Backup from './Backup.jsx';
 import ChangeRequests from './ChangeRequests.jsx';
 import Dashboard from './Dashboard.jsx';
@@ -116,6 +117,21 @@ function ProjectList({ store }) {
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState('all');
   const [sort, setSort] = useState('recent');
+  const [view, setView] = useState(() => {
+    try {
+      return localStorage.getItem('pfui.view') || 'list';
+    } catch {
+      return 'list';
+    }
+  });
+  const pickView = (v) => {
+    setView(v);
+    try {
+      localStorage.setItem('pfui.view', v);
+    } catch {
+      /* אין שמירה מקומית */
+    }
+  };
 
   const create = (form) => {
     const p = makeProject(form);
@@ -162,6 +178,14 @@ function ProjectList({ store }) {
           <option value="progress">לפי התקדמות</option>
           <option value="target">לפי יעד הפעלה</option>
         </select>
+        <div className="seg" role="group" aria-label="תצוגה">
+          <button type="button" className={view === 'list' ? 'on' : ''} aria-pressed={view === 'list'} onClick={() => pickView('list')}>
+            רשימה
+          </button>
+          <button type="button" className={view === 'board' ? 'on' : ''} aria-pressed={view === 'board'} onClick={() => pickView('board')}>
+            לוח
+          </button>
+        </div>
         {!adding && (
           <button type="button" onClick={() => setAdding(true)}>
             פרויקט חדש
@@ -182,6 +206,32 @@ function ProjectList({ store }) {
         <p className="pf-empty">אין פרויקטים עדיין. לחצו על "פרויקט חדש" כדי להתחיל מהשלב הראשון.</p>
       ) : shown.length === 0 ? (
         <p className="pf-empty">לא נמצאו פרויקטים שמתאימים לחיפוש או לסינון.</p>
+      ) : view === 'board' ? (
+        <div className="board">
+          {[...STAGES, { id: '_done', title: 'הושלם' }].map((col) => {
+            const items = shown.filter((p) =>
+              col.id === '_done' ? !currentStage(p) : currentStage(p)?.id === col.id
+            );
+            return (
+              <section key={col.id} className="board-col" aria-label={col.title}>
+                <h3>
+                  {col.title} <span>{items.length}</span>
+                </h3>
+                {items.map((p) => (
+                  <Link key={p.id} to={`/projectflow/${p.id}`} className="board-card">
+                    <strong>{p.name}</strong>
+                    <span className="muted">{p.owner || TYPES[p.type]}</span>
+                    <span className="bar"><i style={{ width: `${overallProgress(p)}%` }} /></span>
+                    <span className="board-foot">
+                      <span>{overallProgress(p)}%</span>
+                      {overdueStages(p).length > 0 && <span className="badge high">באיחור</span>}
+                    </span>
+                  </Link>
+                ))}
+              </section>
+            );
+          })}
+        </div>
       ) : (
         <div className="pf-rows">
           {shown.map((p) => {
@@ -418,40 +468,72 @@ function ProjectDetail({ store }) {
   return <Detail key={project.id} project={project} store={store} />;
 }
 
+const ICONS = {
+  projects: 'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
+  dashboard: 'M4 13h6V4H4zm0 7h6v-5H4zm10 0h6v-9h-6zm0-16v5h6V4z',
+  risks: 'M12 3 2 20h20zM12 10v4m0 3v.5',
+  decisions: 'M5 12l4 4L19 6',
+  changes: 'M4 7h12m0 0-3-3m3 3-3 3M20 17H8m0 0 3-3m-3 3 3 3',
+  payments: 'M3 7h18v10H3zM3 11h18M7 15h3',
+  backup: 'M12 4v11m0 0-4-4m4 4 4-4M5 20h14',
+};
+
+const NAV = [
+  ['', 'פרויקטים', 'projects'],
+  ['dashboard', 'לוח בקרה', 'dashboard'],
+  ['risks', 'סיכונים', 'risks'],
+  ['decisions', 'החלטות', 'decisions'],
+  ['changes', 'בקשות שינוי', 'changes'],
+  ['payments', 'תשלומים', 'payments'],
+  ['backup', 'גיבוי', 'backup'],
+];
+
+function NavIcon({ name }) {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d={ICONS[name]} />
+    </svg>
+  );
+}
+
 export default function ProjectFlow() {
   const store = useProjects();
+  const { pathname } = useLocation();
+  const section = pathname.replace(/^\/projectflow\/?/, '').split('/')[0];
+  const heading = NAV.find(([to]) => to === section)?.[1];
   return (
     <div className="pf">
-      <header className="pf-top">
+      <aside className="pf-side">
         <Link to="/" className="pf-brand" aria-label="ביתנא, דף הבית">
-          <img src="/favicon.svg" alt="" width="40" height="40" />
+          <img src="/favicon.svg" alt="" width="36" height="36" />
+          <span>
+            <strong>ProjectFlow</strong>
+            <small>ממכרז ועד אספקה</small>
+          </span>
         </Link>
-        <div>
-          <h1>ProjectFlow</h1>
-          <p>מעקב אחרי פרויקט רכש ו-IT, ממכרז ועד אספקה</p>
-        </div>
-      </header>
-      <nav className="pf-tabs" aria-label="ניווט ProjectFlow">
-        <NavLink to="/projectflow" end>
-          פרויקטים
-        </NavLink>
-        <NavLink to="/projectflow/dashboard">לוח בקרה</NavLink>
-        <NavLink to="/projectflow/risks">סיכונים</NavLink>
-        <NavLink to="/projectflow/decisions">החלטות</NavLink>
-        <NavLink to="/projectflow/changes">בקשות שינוי</NavLink>
-        <NavLink to="/projectflow/payments">תשלומים</NavLink>
-        <NavLink to="/projectflow/backup">גיבוי</NavLink>
-      </nav>
-      <Routes>
-        <Route index element={<ProjectList store={store} />} />
-        <Route path="dashboard" element={<Dashboard store={store} />} />
-        <Route path="risks" element={<Risks store={store} />} />
-        <Route path="decisions" element={<Decisions store={store} />} />
-        <Route path="changes" element={<ChangeRequests store={store} />} />
-        <Route path="payments" element={<Payments store={store} />} />
-        <Route path="backup" element={<Backup store={store} />} />
-        <Route path=":id" element={<ProjectDetail store={store} />} />
-      </Routes>
+        <nav className="pf-nav" aria-label="ניווט ProjectFlow">
+          {NAV.map(([to, label, icon]) => (
+            <NavLink key={icon} to={to ? `/projectflow/${to}` : '/projectflow'} end={!to}>
+              <NavIcon name={icon} />
+              <span>{label}</span>
+            </NavLink>
+          ))}
+        </nav>
+        <SyncBadge />
+      </aside>
+      <main className="pf-main">
+        {heading && <h1 className="pf-page">{heading}</h1>}
+        <Routes>
+          <Route index element={<ProjectList store={store} />} />
+          <Route path="dashboard" element={<Dashboard store={store} />} />
+          <Route path="risks" element={<Risks store={store} />} />
+          <Route path="decisions" element={<Decisions store={store} />} />
+          <Route path="changes" element={<ChangeRequests store={store} />} />
+          <Route path="payments" element={<Payments store={store} />} />
+          <Route path="backup" element={<Backup store={store} />} />
+          <Route path=":id" element={<ProjectDetail store={store} />} />
+        </Routes>
+      </main>
     </div>
   );
 }

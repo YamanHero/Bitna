@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { persist } from '../lib/cloud.js';
 import { uid } from './storage.js';
 
 export const RISKS_KEY = 'projectflow.risks.v1';
@@ -61,12 +62,14 @@ export function useList(key) {
   const [items, setItems] = useState(() => load(key));
 
   useEffect(() => {
-    try {
-      localStorage.setItem(key, JSON.stringify(items));
-    } catch {
-      /* שמירה מקומית לא זמינה – ממשיכים בלי */
-    }
+    persist(key, items);
   }, [key, items]);
+
+  useEffect(() => {
+    const reload = () => setItems(load(key));
+    window.addEventListener('pf:data', reload);
+    return () => window.removeEventListener('pf:data', reload);
+  }, [key]);
 
   const add = useCallback(
     (item) =>
