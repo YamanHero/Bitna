@@ -24,7 +24,7 @@ export default function Home() {
       <p className="muted">האפליקציות שלנו במקום אחד</p>
       <div className="cards">
         <Link to="/projectflow" className="card app-card">
-          <h2>ProjectFlow</h2>
+          <h2>מגדל בקרה</h2>
           <p>מעקב אחרי פרויקט רכש ו-IT, ממכרז ועד אספקה: שלבים, סיכונים, החלטות, שינויים ותשלומים.</p>
           <ProjectFlowSummary />
         </Link>

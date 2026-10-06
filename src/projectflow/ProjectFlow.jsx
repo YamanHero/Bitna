@@ -532,11 +532,11 @@ export default function ProjectFlow() {
         <Link to="/" className="pf-brand" aria-label="ביתנא, דף הבית">
           <img src="/favicon.svg" alt="" width="36" height="36" />
           <span>
-            <strong>ProjectFlow</strong>
+            <strong>מגדל בקרה</strong>
             <small>ממכרז ועד אספקה</small>
           </span>
         </Link>
-        <nav className="pf-nav" aria-label="ניווט ProjectFlow">
+        <nav className="pf-nav" aria-label="ניווט מגדל בקרה">
           {NAV.map(([to, label, icon, secondary]) => (
             <NavLink
               key={icon}

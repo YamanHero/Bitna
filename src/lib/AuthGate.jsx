@@ -48,7 +48,7 @@ function Login() {
     <main className="login">
       <form className="login-card" onSubmit={submit}>
         <img src="/favicon.svg" alt="" width="64" height="64" />
-        <h1>ProjectFlow</h1>
+        <h1>מגדל בקרה</h1>
         <p className="muted">
           {mode === 'in' ? 'היכנסו כדי לשמור את הנתונים בענן ולעבוד מכל מכשיר.' : 'יצירת חשבון חדש'}
         </p>

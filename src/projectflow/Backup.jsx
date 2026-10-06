@@ -112,7 +112,7 @@ export default function Backup({ store }) {
         ([k, v]) => k.startsWith(PREFIX) && typeof v === 'string' && v.length > 0
       );
       if (payload?.app !== 'projectflow' || valid.length === 0) {
-        setMsg({ ok: false, text: 'הקובץ אינו גיבוי של ProjectFlow. בחרו קובץ שנוצר בלחיצה על "הורדת גיבוי".' });
+        setMsg({ ok: false, text: 'הקובץ אינו גיבוי של מגדל בקרה. בחרו קובץ שנוצר בלחיצה על "הורדת גיבוי".' });
         return;
       }
       if (!window.confirm('הנתונים הנוכחיים בדפדפן זה יוחלפו בנתוני הקובץ. להמשיך?')) return;

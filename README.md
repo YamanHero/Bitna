@@ -16,7 +16,7 @@ npm run dev
 | `/` | דף הבית |
 | `/projectflow` | ProjectFlow – ניהול מחזור חיים של פרויקט רכש / IT, ממכרז ועד אספקה |
 
-## ProjectFlow
+## מגדל בקרה (ProjectFlow)
 
 הקוד נמצא ב-`src/projectflow/`. שלבי מחזור החיים מוגדרים ב-`stages.js` וניתנים להתאמה.
 כרגע הנתונים נשמרים ב-localStorage של הדפדפן; המעבר ל-Supabase יתבצע בהמשך.
