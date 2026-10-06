@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
-import { STAGES } from './stages.js';
-import { currentStage, overallProgress, overdueStages, stageStatus } from './storage.js';
+import { currentStage, overallProgress, overdueStages, stageStatus, stagesOf } from './storage.js';
 import { RISKS_KEY, exposure, kindLabel, useList } from './registers.js';
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
@@ -39,7 +38,7 @@ export default function Dashboard({ store }) {
   const weekEnd = addDays(7);
   const soon = active
     .flatMap((p) =>
-      STAGES.filter((s) => {
+      stagesOf(p).filter((s) => {
         const due = p.stageMeta?.[s.id]?.due;
         return due && due >= today && due <= weekEnd && !stageStatus(p, s.id).complete;
       }).map((s) => ({ p, s, due: p.stageMeta[s.id].due }))

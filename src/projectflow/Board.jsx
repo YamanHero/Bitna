@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { currentStage, overallProgress, overdueStages, daysLeft } from './storage.js';
+import { currentStage, overallProgress, overdueStages, daysLeft, stagesOf } from './storage.js';
 
 // חמישה שלבי-על במקום שלושה-עשר שלבים: הלוח נכנס במסך ונוח לתפעול.
 export const PHASES = [
@@ -11,9 +11,16 @@ export const PHASES = [
   { id: 'close', label: 'סגירה', stages: ['closure', '_done'], color: 'var(--ph-close)' },
 ];
 
+// שלב מותאם אישית משויך לשלב-העל של השלב הסטנדרטי שלפניו.
 const phaseOf = (p) => {
-  const id = currentStage(p)?.id || '_done';
-  return PHASES.find((ph) => ph.stages.includes(id)) || PHASES[0];
+  const cur = currentStage(p);
+  if (!cur) return PHASES[PHASES.length - 1];
+  const list = stagesOf(p);
+  for (let i = list.findIndex((s) => s.id === cur.id); i >= 0; i -= 1) {
+    const ph = PHASES.find((x) => x.stages.includes(list[i].id));
+    if (ph) return ph;
+  }
+  return PHASES[0];
 };
 
 export default function Board({ projects, store }) {

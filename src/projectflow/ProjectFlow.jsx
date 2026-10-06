@@ -9,9 +9,12 @@ import ChangeRequests from './ChangeRequests.jsx';
 import Dashboard from './Dashboard.jsx';
 import Decisions from './Decisions.jsx';
 import Payments from './Payments.jsx';
+import { TEAM_KEY, useList } from './registers.js';
+import Tasks from './Tasks.jsx';
 import Risks from './Risks.jsx';
 import { STAGES } from './stages.js';
 import {
+  catalogStage,
   currentStage,
   daysLeft,
   makeProject,
@@ -19,6 +22,8 @@ import {
   overallProgress,
   overdueStages,
   stageStatus,
+  stagesOf,
+  TEMPLATES,
   uid,
   useProjects,
 } from './storage.js';
@@ -35,7 +40,7 @@ function StageRail({ project }) {
   const cur = currentStage(project);
   return (
     <ol className="rail" aria-label="התקדמות בשלבי הפרויקט">
-      {STAGES.map((s) => {
+      {stagesOf(project).map((s) => {
         const st = stageStatus(project, s.id);
         const state = st.complete ? 'done' : cur?.id === s.id ? 'current' : 'todo';
         return (
@@ -100,6 +105,18 @@ function ProjectForm({ initial, submitLabel, onSubmit, onCancel }) {
         יעד הפעלה
         <input type="date" value={form.targetDate} onChange={set('targetDate')} />
       </label>
+      {'template' in form && (
+        <label className="wide">
+          סוג ההליך (קובע אילו שלבים ייכללו, ואפשר לשנות אחר כך)
+          <select value={form.template} onChange={set('template')}>
+            {TEMPLATES.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       <div className="row">
         <button type="submit">{submitLabel}</button>
         {onCancel && (
@@ -112,7 +129,7 @@ function ProjectForm({ initial, submitLabel, onSubmit, onCancel }) {
   );
 }
 
-const BLANK = { name: '', type: 'it', owner: '', budget: '', targetDate: '' };
+const BLANK = { name: '', type: 'it', owner: '', budget: '', targetDate: '', template: 'full' };
 
 function ProjectList({ store }) {
   const navigate = useNavigate();
@@ -247,36 +264,95 @@ function ProjectList({ store }) {
   );
 }
 
+function TaskRow({ t, team, today, onToggle, onPatch, onRemove }) {
+  const late = t.due && t.due < today && !t.done;
+  return (
+    <li className={`task${t.done ? ' done' : ''}`}>
+      <div className="task-top">
+        <input type="checkbox" id={`task-${t.id}`} checked={t.done} onChange={() => onToggle(t.id)} />
+        <label htmlFor={`task-${t.id}`}>{t.title}</label>
+        {late && <span className="badge high">באיחור</span>}
+        <button
+          type="button"
+          className="ghost icon-btn"
+          onClick={() => onRemove(t.id)}
+          aria-label={`מחיקת משימה ${t.title}`}
+        >
+          ✕
+        </button>
+      </div>
+      <div className="task-meta">
+        <select
+          value={t.assignee || ''}
+          onChange={(e) => onPatch(t.id, { assignee: e.target.value })}
+          aria-label={`אחראי למשימה ${t.title}`}
+        >
+          <option value="">ללא אחראי</option>
+          {team.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.name}
+            </option>
+          ))}
+        </select>
+        <input
+          type="date"
+          value={t.due || ''}
+          onChange={(e) => onPatch(t.id, { due: e.target.value })}
+          aria-label={`יעד למשימה ${t.title}`}
+        />
+      </div>
+    </li>
+  );
+}
+
 function Detail({ project, store }) {
   const navigate = useNavigate();
+  const team = useList(TEAM_KEY).items;
   const [sel, setSel] = useState(null);
   const [newTask, setNewTask] = useState('');
+  const [bulk, setBulk] = useState(false);
+  const [bulkText, setBulkText] = useState('');
   const [editing, setEditing] = useState(false);
+  const [manage, setManage] = useState(false);
+  const [customStage, setCustomStage] = useState('');
 
   const today = new Date().toISOString().slice(0, 10);
+  const stages = stagesOf(project);
   const activeId = sel ?? currentStage(project)?.id;
-  const active = STAGES.find((s) => s.id === activeId) ?? STAGES[STAGES.length - 1];
-  const meta = project.stageMeta[active.id] || {};
-  const tasks = project.tasks.filter((t) => t.stage === active.id);
+  const active = stages.find((s) => s.id === activeId) ?? stages[stages.length - 1] ?? null;
+  const meta = (active && project.stageMeta[active.id]) || {};
+  const tasks = active ? project.tasks.filter((t) => t.stage === active.id) : [];
   const pct = overallProgress(project);
   const budget = formatBudget(project.budget);
-  const gate = openBefore(project, active.id);
-  const activeDone = stageStatus(project, active.id).complete;
+  const gate = active ? openBefore(project, active.id) : { open: 0 };
+  const activeDone = active ? stageStatus(project, active.id).complete : false;
+  const missing = STAGES.filter((s) => !stages.some((x) => x.id === s.id));
 
   const patch = (fn) => store.update(project.id, fn);
 
+  // ---- משימות ----
   const toggle = (id) =>
     patch((p) => ({ ...p, tasks: p.tasks.map((t) => (t.id === id ? { ...t, done: !t.done } : t)) }));
+  const patchTask = (id, change) =>
+    patch((p) => ({ ...p, tasks: p.tasks.map((t) => (t.id === id ? { ...t, ...change } : t)) }));
   const removeTask = (id) => patch((p) => ({ ...p, tasks: p.tasks.filter((t) => t.id !== id) }));
-  const addTask = (e) => {
-    e.preventDefault();
-    const title = newTask.trim();
-    if (!title) return;
+  const addTasks = (titles) => {
+    const clean = titles.map((x) => x.trim()).filter(Boolean);
+    if (!clean.length || !active) return;
     patch((p) => ({
       ...p,
-      tasks: [...p.tasks, { id: uid(), stage: active.id, title, done: false }],
+      tasks: [...p.tasks, ...clean.map((title) => ({ id: uid(), stage: active.id, title, done: false }))],
     }));
+  };
+  const addTask = (e) => {
+    e.preventDefault();
+    addTasks([newTask]);
     setNewTask('');
+  };
+  const addBulk = () => {
+    addTasks(bulkText.split('\n'));
+    setBulkText('');
+    setBulk(false);
   };
   const setMeta = (key) => (e) => {
     const value = e.target.value;
@@ -285,6 +361,75 @@ function Detail({ project, store }) {
       stageMeta: { ...p.stageMeta, [active.id]: { ...p.stageMeta[active.id], [key]: value } },
     }));
   };
+
+  // ---- שלבים ----
+  const setStages = (fn) => patch((p) => ({ ...p, stages: fn(stagesOf(p)) }));
+  const moveStage = (i, dir) =>
+    setStages((list) => {
+      const j = i + dir;
+      if (j < 0 || j >= list.length) return list;
+      const next = [...list];
+      [next[i], next[j]] = [next[j], next[i]];
+      return next;
+    });
+  const renameStage = (id, title) =>
+    setStages((list) => list.map((s) => (s.id === id ? { ...s, title } : s)));
+  const removeStage = (s) => {
+    const n = project.tasks.filter((t) => t.stage === s.id).length;
+    if (!window.confirm(`להסיר את השלב "${s.title}"${n ? ` ואת ${n} המשימות שבו` : ''}?`)) return;
+    patch((p) => {
+      const { [s.id]: _gone, ...rest } = p.stageMeta || {};
+      return {
+        ...p,
+        stages: stagesOf(p).filter((x) => x.id !== s.id),
+        tasks: p.tasks.filter((t) => t.stage !== s.id),
+        stageMeta: rest,
+      };
+    });
+    if (sel === s.id) setSel(null);
+  };
+  // שלב חדש נכנס לפני "סיכום וסגירה" אם הוא קיים, אחרת בסוף.
+  const insertIndex = (list) => {
+    const i = list.findIndex((s) => s.id === 'closure');
+    return i === -1 ? list.length : i;
+  };
+  const addCatalogStage = (id) => {
+    const cat = catalogStage(id);
+    if (!cat) return;
+    patch((p) => {
+      const list = stagesOf(p);
+      const canon = STAGES.findIndex((s) => s.id === id);
+      // אחרי השלב הסטנדרטי הקרוב ביותר שקדם לו בקטלוג ונמצא כבר בפרויקט.
+      let at = 0;
+      list.forEach((s, i) => {
+        const c = STAGES.findIndex((x) => x.id === s.id);
+        if (c !== -1 && c < canon) at = i + 1;
+      });
+      const next = [...list];
+      next.splice(at, 0, { id: cat.id, title: cat.title });
+      return {
+        ...p,
+        stages: next,
+        tasks: [...p.tasks, ...cat.tasks.map((title) => ({ id: uid(), stage: cat.id, title, done: false }))],
+      };
+    });
+    setSel(id);
+  };
+  const addCustomStage = (e) => {
+    e.preventDefault();
+    const title = customStage.trim();
+    if (!title) return;
+    const id = `c_${uid()}`;
+    patch((p) => {
+      const list = stagesOf(p);
+      const next = [...list];
+      next.splice(insertIndex(list), 0, { id, title });
+      return { ...p, stages: next };
+    });
+    setCustomStage('');
+    setSel(id);
+  };
+
   const saveDetails = (form) => {
     patch((p) => ({
       ...p,
@@ -344,85 +489,163 @@ function Detail({ project, store }) {
       <StageRail project={project} />
 
       <div className="pf-detail">
-        <ol className="stage-list">
-          {STAGES.map((s, i) => {
-            const st = stageStatus(project, s.id);
-            const due = project.stageMeta[s.id]?.due;
-            const late = due && due < today && !st.complete;
-            return (
-              <li key={s.id}>
-                <button
-                  type="button"
-                  className={`stage-btn${s.id === active.id ? ' active' : ''}${st.complete ? ' done' : ''}`}
-                  onClick={() => setSel(s.id)}
-                  aria-current={s.id === active.id ? 'step' : undefined}
-                >
-                  <span>
-                    {i + 1}. {s.title}
-                  </span>
-                  <span className={`stage-count${late ? ' late' : ''}`}>
-                    {st.complete ? '✓' : late ? 'באיחור' : `${st.done}/${st.total}`}
-                  </span>
-                </button>
-              </li>
-            );
-          })}
-        </ol>
+        <div className="stage-col">
+          <div className="stage-head">
+            <h3>שלבים ({stages.length})</h3>
+            <button type="button" className="ghost sm" onClick={() => setManage((v) => !v)}>
+              {manage ? 'סיום עריכה' : 'ניהול שלבים'}
+            </button>
+          </div>
 
-        <section className="pf-panel">
-          <h3 className="pf-stage-title">{active.title}</h3>
+          <ol className="stage-list">
+            {stages.map((s, i) => {
+              const st = stageStatus(project, s.id);
+              const due = project.stageMeta[s.id]?.due;
+              const late = due && due < today && !st.complete;
+              if (manage) {
+                return (
+                  <li key={s.id} className="stage-edit">
+                    <input
+                      value={s.title}
+                      onChange={(e) => renameStage(s.id, e.target.value)}
+                      aria-label="שם השלב"
+                    />
+                    <button type="button" className="ghost icon-btn" onClick={() => moveStage(i, -1)} disabled={i === 0} aria-label="הזזה למעלה">
+                      ▲
+                    </button>
+                    <button type="button" className="ghost icon-btn" onClick={() => moveStage(i, 1)} disabled={i === stages.length - 1} aria-label="הזזה למטה">
+                      ▼
+                    </button>
+                    <button type="button" className="danger icon-btn" onClick={() => removeStage(s)} aria-label={`הסרת השלב ${s.title}`}>
+                      ✕
+                    </button>
+                  </li>
+                );
+              }
+              return (
+                <li key={s.id}>
+                  <button
+                    type="button"
+                    className={`stage-btn${active && s.id === active.id ? ' active' : ''}${st.complete ? ' done' : ''}`}
+                    onClick={() => setSel(s.id)}
+                    aria-current={active && s.id === active.id ? 'step' : undefined}
+                  >
+                    <span>
+                      {i + 1}. {s.title}
+                    </span>
+                    <span className={`stage-count${late ? ' late' : ''}`}>
+                      {st.complete ? '✓' : late ? 'באיחור' : st.empty ? 'ריק' : `${st.done}/${st.total}`}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+            {stages.length === 0 && <li className="muted">אין שלבים. הוסיפו שלב כדי להתחיל.</li>}
+          </ol>
 
-          {gate.open > 0 && !activeDone && (
-            <p className="pf-gate" role="status">
-              השלב הקודם, "{gate.stage.title}", עוד לא הושלם: נותרו {gate.open} משימות פתוחות. כדאי
-              לסגור אותן לפני שממשיכים כאן.
-            </p>
-          )}
-
-          <ul className="task-list">
-            {tasks.map((t) => (
-              <li key={t.id} className={`task${t.done ? ' done' : ''}`}>
+          {manage && (
+            <div className="stage-add">
+              {missing.length > 0 && (
+                <label>
+                  הוספת שלב סטנדרטי
+                  <select value="" onChange={(e) => e.target.value && addCatalogStage(e.target.value)}>
+                    <option value="">בחרו שלב להוספה…</option>
+                    {missing.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.title}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              <form className="row" onSubmit={addCustomStage}>
                 <input
-                  type="checkbox"
-                  id={`task-${t.id}`}
-                  checked={t.done}
-                  onChange={() => toggle(t.id)}
+                  type="text"
+                  placeholder="שלב משלי, למשל: הטמעה"
+                  aria-label="שם שלב חדש"
+                  value={customStage}
+                  onChange={(e) => setCustomStage(e.target.value)}
                 />
-                <label htmlFor={`task-${t.id}`}>{t.title}</label>
-                <button
-                  type="button"
-                  className="ghost icon-btn"
-                  onClick={() => removeTask(t.id)}
-                  aria-label={`מחיקת משימה ${t.title}`}
-                >
-                  ✕
+                <button type="submit">הוספה</button>
+              </form>
+            </div>
+          )}
+        </div>
+
+        {active ? (
+          <section className="pf-panel">
+            <h3 className="pf-stage-title">{active.title}</h3>
+
+            {gate.open > 0 && !activeDone && (
+              <p className="pf-gate" role="status">
+                השלב הקודם, "{gate.stage.title}", עוד לא הושלם: נותרו {gate.open} משימות פתוחות. כדאי
+                לסגור אותן לפני שממשיכים כאן.
+              </p>
+            )}
+
+            <ul className="task-list">
+              {tasks.map((t) => (
+                <TaskRow
+                  key={t.id}
+                  t={t}
+                  team={team}
+                  today={today}
+                  onToggle={toggle}
+                  onPatch={patchTask}
+                  onRemove={removeTask}
+                />
+              ))}
+              {tasks.length === 0 && <li className="muted">אין משימות בשלב זה.</li>}
+            </ul>
+
+            {team.length === 0 && (
+              <p className="muted hint">
+                כדי לשייך משימות לאנשים, הוסיפו חברי צוות בלשונית <Link to="/projectflow/tasks">משימות וצוות</Link>.
+              </p>
+            )}
+
+            <form className="row" onSubmit={addTask}>
+              <input
+                type="text"
+                placeholder="הוספת משימה"
+                aria-label="משימה חדשה"
+                value={newTask}
+                onChange={(e) => setNewTask(e.target.value)}
+              />
+              <button type="submit">הוספה</button>
+              <button type="button" className="ghost" onClick={() => setBulk((v) => !v)}>
+                {bulk ? 'ביטול' : 'הדבקת רשימה'}
+              </button>
+            </form>
+            {bulk && (
+              <div className="bulk">
+                <textarea
+                  value={bulkText}
+                  onChange={(e) => setBulkText(e.target.value)}
+                  placeholder={'משימה בכל שורה, למשל:\nהכנת מסמך דרישות\nפגישה עם הספק'}
+                  aria-label="רשימת משימות להדבקה"
+                />
+                <button type="button" onClick={addBulk}>
+                  הוספת כל השורות כמשימות
                 </button>
-              </li>
-            ))}
-            {tasks.length === 0 && <li className="muted">אין משימות בשלב זה.</li>}
-          </ul>
+              </div>
+            )}
 
-          <form className="row" onSubmit={addTask}>
-            <input
-              type="text"
-              placeholder="הוספת משימה"
-              aria-label="משימה חדשה"
-              value={newTask}
-              onChange={(e) => setNewTask(e.target.value)}
-            />
-            <button type="submit">הוספה</button>
-          </form>
+            <label className="section-label" htmlFor="due">
+              תאריך יעד לשלב
+            </label>
+            <input id="due" type="date" value={meta.due || ''} onChange={setMeta('due')} />
 
-          <label className="section-label" htmlFor="due">
-            תאריך יעד לשלב
-          </label>
-          <input id="due" type="date" value={meta.due || ''} onChange={setMeta('due')} />
-
-          <label className="section-label" htmlFor="notes">
-            הערות
-          </label>
-          <textarea id="notes" value={meta.notes || ''} onChange={setMeta('notes')} />
-        </section>
+            <label className="section-label" htmlFor="notes">
+              הערות
+            </label>
+            <textarea id="notes" value={meta.notes || ''} onChange={setMeta('notes')} />
+          </section>
+        ) : (
+          <section className="pf-panel">
+            <p className="muted">אין שלבים בפרויקט. לחצו על "ניהול שלבים" והוסיפו שלב.</p>
+          </section>
+        )}
       </div>
 
       <p className="pf-danger-zone">
@@ -455,14 +678,16 @@ const ICONS = {
   changes: 'M4 7h12m0 0-3-3m3 3-3 3M20 17H8m0 0 3-3m-3 3 3 3',
   payments: 'M3 7h18v10H3zM3 11h18M7 15h3',
   backup: 'M12 4v11m0 0-4-4m4 4 4-4M5 20h14',
+  tasks: 'M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2',
   assistant: 'M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8zM18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8z',
   more: 'M5 12h.01M12 12h.01M19 12h.01',
 };
 
 const NAV = [
   ['', 'פרויקטים', 'projects'],
+  ['tasks', 'משימות וצוות', 'tasks'],
   ['assistant', 'עוזר', 'assistant'],
-  ['dashboard', 'לוח בקרה', 'dashboard'],
+  ['dashboard', 'לוח בקרה', 'dashboard', true],
   ['risks', 'סיכונים', 'risks'],
   ['decisions', 'החלטות', 'decisions', true],
   ['changes', 'בקשות שינוי', 'changes', true],
@@ -539,6 +764,7 @@ export default function ProjectFlow() {
         {heading && <h1 className="pf-page">{heading}</h1>}
         <Routes>
           <Route index element={<ProjectList store={store} />} />
+          <Route path="tasks" element={<Tasks store={store} />} />
           <Route path="assistant" element={<Assistant store={store} />} />
           <Route path="dashboard" element={<Dashboard store={store} />} />
           <Route path="risks" element={<Risks store={store} />} />
