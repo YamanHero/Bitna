@@ -1,12 +1,18 @@
 import { Link } from 'react-router-dom';
+import { overallProgress, overdueStages, useProjects } from '../projectflow/storage.js';
 
-const APPS = [
-  {
-    to: '/projectflow',
-    title: 'ProjectFlow',
-    desc: 'מעקב אחרי פרויקט רכש ו-IT, ממכרז ועד אספקה: שלבים, סיכונים, החלטות, שינויים ותשלומים.',
-  },
-];
+function ProjectFlowSummary() {
+  const { projects } = useProjects();
+  const active = projects.filter((p) => overallProgress(p) < 100);
+  const late = active.filter((p) => overdueStages(p).length > 0);
+  if (projects.length === 0) return <p className="app-stat">עוד אין פרויקטים. אפשר להתחיל מהראשון.</p>;
+  return (
+    <p className="app-stat">
+      {active.length} פרויקטים בביצוע
+      {late.length > 0 && <span className="warn">{late.length} עם שלבים באיחור</span>}
+    </p>
+  );
+}
 
 export default function Home() {
   return (
@@ -17,12 +23,11 @@ export default function Home() {
       </div>
       <p className="muted">האפליקציות שלנו במקום אחד</p>
       <div className="cards">
-        {APPS.map((a) => (
-          <Link key={a.to} to={a.to} className="card app-card">
-            <h2>{a.title}</h2>
-            <p>{a.desc}</p>
-          </Link>
-        ))}
+        <Link to="/projectflow" className="card app-card">
+          <h2>ProjectFlow</h2>
+          <p>מעקב אחרי פרויקט רכש ו-IT, ממכרז ועד אספקה: שלבים, סיכונים, החלטות, שינויים ותשלומים.</p>
+          <ProjectFlowSummary />
+        </Link>
       </div>
     </main>
   );

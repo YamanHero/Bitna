@@ -14,13 +14,14 @@ function load() {
   }
 }
 
-export function makeProject({ name, type, owner, budget }) {
+export function makeProject({ name, type, owner, budget, targetDate = '' }) {
   return {
     id: uid(),
     name,
     type,
     owner,
     budget,
+    targetDate,
     createdAt: new Date().toISOString(),
     tasks: STAGES.flatMap((s) =>
       s.tasks.map((title) => ({ id: uid(), stage: s.id, title, done: false }))
@@ -33,6 +34,14 @@ export function stageStatus(project, stageId) {
   const ts = project.tasks.filter((t) => t.stage === stageId);
   const done = ts.filter((t) => t.done).length;
   return { total: ts.length, done, complete: ts.length > 0 && done === ts.length };
+}
+
+// כמה ימים נשארו עד יעד ההפעלה של הפרויקט (שלילי = עבר). null אם לא הוגדר יעד.
+export function daysLeft(project, now = new Date()) {
+  if (!project.targetDate) return null;
+  const today = new Date(`${now.toISOString().slice(0, 10)}T00:00:00`);
+  const target = new Date(`${project.targetDate}T00:00:00`);
+  return Math.round((target - today) / 86400000);
 }
 
 // שלבים שמועד היעד שלהם עבר והם עדיין לא הושלמו.

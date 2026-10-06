@@ -9,6 +9,7 @@ import Risks from './Risks.jsx';
 import { STAGES } from './stages.js';
 import {
   currentStage,
+  daysLeft,
   makeProject,
   openBefore,
   overallProgress,
@@ -46,6 +47,17 @@ function StageRail({ project }) {
   );
 }
 
+// תג שמראה אם יעד ההפעלה קרוב או שעבר.
+function TargetBadge({ project }) {
+  const d = daysLeft(project);
+  if (d === null || overallProgress(project) === 100) return null;
+  if (d < 0) return <span className="badge high">יעד ההפעלה עבר לפני {-d} ימים</span>;
+  if (d <= 30) {
+    return <span className="badge mid">{d === 0 ? 'יעד ההפעלה היום' : `${d} ימים ליעד ההפעלה`}</span>;
+  }
+  return null;
+}
+
 function ProjectForm({ initial, submitLabel, onSubmit, onCancel }) {
   const [form, setForm] = useState(initial);
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -80,6 +92,10 @@ function ProjectForm({ initial, submitLabel, onSubmit, onCancel }) {
         תקציב (₪)
         <input type="number" min="0" value={form.budget} onChange={set('budget')} />
       </label>
+      <label>
+        יעד הפעלה
+        <input type="date" value={form.targetDate} onChange={set('targetDate')} />
+      </label>
       <div className="row">
         <button type="submit">{submitLabel}</button>
         {onCancel && (
@@ -92,13 +108,14 @@ function ProjectForm({ initial, submitLabel, onSubmit, onCancel }) {
   );
 }
 
-const BLANK = { name: '', type: 'it', owner: '', budget: '' };
+const BLANK = { name: '', type: 'it', owner: '', budget: '', targetDate: '' };
 
 function ProjectList({ store }) {
   const navigate = useNavigate();
   const [adding, setAdding] = useState(false);
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState('all');
+  const [sort, setSort] = useState('recent');
 
   const create = (form) => {
     const p = makeProject(form);
@@ -108,13 +125,21 @@ function ProjectList({ store }) {
   };
 
   const query = q.trim().toLowerCase();
-  const shown = store.projects.filter((p) => {
+  const order = {
+    recent: () => 0,
+    name: (a, b) => a.name.localeCompare(b.name, 'he'),
+    progress: (a, b) => overallProgress(b) - overallProgress(a),
+    target: (a, b) => (a.targetDate || '9999').localeCompare(b.targetDate || '9999'),
+  };
+  const shown = store.projects
+    .filter((p) => {
     const done = overallProgress(p) === 100;
     if (filter === 'active' && done) return false;
     if (filter === 'done' && !done) return false;
     if (!query) return true;
     return `${p.name} ${p.owner}`.toLowerCase().includes(query);
-  });
+  })
+    .sort(order[sort]);
 
   return (
     <>
@@ -130,6 +155,12 @@ function ProjectList({ store }) {
           <option value="all">כל הפרויקטים</option>
           <option value="active">בביצוע</option>
           <option value="done">הושלמו</option>
+        </select>
+        <select value={sort} onChange={(e) => setSort(e.target.value)} aria-label="מיון">
+          <option value="recent">החדשים קודם</option>
+          <option value="name">לפי שם</option>
+          <option value="progress">לפי התקדמות</option>
+          <option value="target">לפי יעד הפעלה</option>
         </select>
         {!adding && (
           <button type="button" onClick={() => setAdding(true)}>
@@ -166,6 +197,7 @@ function ProjectList({ store }) {
                     <span>{TYPES[p.type] || p.type}</span>
                     {p.owner && <span>אחראי: {p.owner}</span>}
                     {budget && <span>{budget}</span>}
+                    {p.targetDate && <span>יעד הפעלה: {p.targetDate}</span>}
                   </div>
                 </div>
                 <StageRail project={p} />
@@ -175,6 +207,7 @@ function ProjectList({ store }) {
                   </span>
                   <span className="pf-pct">{pct}%</span>
                   {late > 0 && <span className="badge high">{late} באיחור</span>}
+                  <TargetBadge project={p} />
                 </div>
               </Link>
             );
@@ -224,7 +257,14 @@ function Detail({ project, store }) {
     }));
   };
   const saveDetails = (form) => {
-    patch((p) => ({ ...p, name: form.name, type: form.type, owner: form.owner, budget: form.budget }));
+    patch((p) => ({
+      ...p,
+      name: form.name,
+      type: form.type,
+      owner: form.owner,
+      budget: form.budget,
+      targetDate: form.targetDate,
+    }));
     setEditing(false);
   };
   const deleteProject = () => {
@@ -247,6 +287,7 @@ function Detail({ project, store }) {
             type: project.type,
             owner: project.owner || '',
             budget: project.budget ?? '',
+            targetDate: project.targetDate || '',
           }}
           submitLabel="שמירת שינויים"
           onSubmit={saveDetails}
@@ -260,8 +301,10 @@ function Detail({ project, store }) {
               <span>{TYPES[project.type] || project.type}</span>
               {project.owner && <span>אחראי: {project.owner}</span>}
               {budget && <span>{budget}</span>}
+              {project.targetDate && <span>יעד הפעלה: {project.targetDate}</span>}
               <span>התקדמות כוללת: {pct}%</span>
             </div>
+            <TargetBadge project={project} />
           </div>
           <button type="button" className="ghost" onClick={() => setEditing(true)}>
             עריכת פרטים
@@ -406,7 +449,7 @@ export default function ProjectFlow() {
         <Route path="decisions" element={<Decisions store={store} />} />
         <Route path="changes" element={<ChangeRequests store={store} />} />
         <Route path="payments" element={<Payments store={store} />} />
-        <Route path="backup" element={<Backup />} />
+        <Route path="backup" element={<Backup store={store} />} />
         <Route path=":id" element={<ProjectDetail store={store} />} />
       </Routes>
     </div>

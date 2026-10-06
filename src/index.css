@@ -1,43 +1,42 @@
 /* ביתנא – עיצוב
-   נייר ודיו: רקע בהיר ירקרק, דיו כהה, ירוק אחד לפעולה ולהתקדמות, אדום חותמת לאיחור וחסם.
-   כותרות באותיות סריף (Frank Ruhl Libre), טקסט רץ ב-Alef.
+   נייר ודיו: רקע בהיר ניטרלי, דיו כהה, כחול אחד לפעולה ולהתקדמות, אדום חותמת לאיחור וחסם.
+   כל הכתב ב-Arial (עם גיבוי ל-Helvetica ו-Liberation Sans), בלי פונטים חיצוניים.
    הרכיב הבולט: פס השלבים וחותמת השלב הנוכחי. כל השאר שקט וללא קישוט. */
 
 :root {
   color-scheme: light dark;
-  --paper: #f2f4f1;
-  --surface: #fbfcfa;
-  --ink: #18262b;
-  --muted: #566568;
-  --line: #d3dbd6;
-  --accent: #0f6e5a;
-  --accent-ink: #0a4f40;
-  --accent-soft: #dcefe9;
+  --paper: #f3f5f9;
+  --surface: #fbfcfe;
+  --ink: #172033;
+  --muted: #566074;
+  --line: #d5dbe6;
+  --accent: #1d4ed8;
+  --accent-ink: #1e3a8a;
+  --accent-soft: #e0e9ff;
   --on-accent: #ffffff;
   --stamp: #a8261e;
   --stamp-soft: #f9e1de;
   --amber: #7a4e00;
   --amber-soft: #f6e6bd;
-  --serif: 'Frank Ruhl Libre', 'David Libre', 'Times New Roman', serif;
-  --sans: 'Alef', 'Heebo', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+  --font: Arial, 'Helvetica Neue', Helvetica, 'Liberation Sans', sans-serif;
   --radius: 6px;
-  font-family: var(--sans);
+  font-family: var(--font);
   color: var(--ink);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #0f1719;
-    --surface: #162124;
-    --ink: #e6eeec;
-    --muted: #9db0b1;
-    --line: #2b3c3f;
-    --accent: #4cc3a4;
-    --accent-ink: #8fe0c9;
-    --accent-soft: #17342d;
-    --on-accent: #06201a;
+    --paper: #0e1320;
+    --surface: #151c2e;
+    --ink: #e8edf7;
+    --muted: #9aa7c0;
+    --line: #28324a;
+    --accent: #7ba4ff;
+    --accent-ink: #b9d0ff;
+    --accent-soft: #1b2a52;
+    --on-accent: #0a1633;
     --stamp: #ff9a90;
-    --stamp-soft: #3b1a17;
+    --stamp-soft: #3b1a1f;
     --amber: #f0c05a;
     --amber-soft: #3a2f12;
   }
@@ -54,14 +53,14 @@
 body {
   margin: 0;
   background: var(--paper);
-  font-size: 1.0625rem;
+  font-size: 1rem;
   line-height: 1.6;
 }
 
 h1,
 h2,
 h3 {
-  font-family: var(--serif);
+  font-family: var(--font);
   line-height: 1.2;
 }
 
@@ -211,7 +210,7 @@ button:disabled {
 .home-head h1 {
   margin: 0;
   font-size: 2.6rem;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .cards {
@@ -264,7 +263,7 @@ button:disabled {
 .pf-top h1 {
   margin: 0;
   font-size: 2rem;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .pf-top p {
@@ -306,7 +305,7 @@ button:disabled {
 .pf-title {
   margin: 0 0 4px;
   font-size: 2rem;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .pf-stage-title {
@@ -416,7 +415,7 @@ button:disabled {
 }
 
 .pf-pct {
-  font-family: var(--serif);
+  font-family: var(--font);
   font-size: 1.25rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -608,9 +607,9 @@ button:disabled {
 }
 
 .stat b {
-  font-family: var(--serif);
+  font-family: var(--font);
   font-size: 2.4rem;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
@@ -746,5 +745,44 @@ button:disabled {
   .pf-row,
   .pf-line {
     transition: background-color 0.12s, border-color 0.12s, color 0.12s;
+  }
+}
+
+/* סיכום בדף הבית */
+
+.app-stat {
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+
+.app-stat .warn {
+  margin-inline-start: 10px;
+}
+
+/* הדפסה */
+
+@media print {
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  .pf-tabs,
+  .pf-toolbar,
+  .pf-brand,
+  .pf-danger-zone,
+  button {
+    display: none !important;
+  }
+
+  .pf-detail {
+    grid-template-columns: 1fr;
+  }
+
+  .stage-list {
+    display: none;
   }
 }
