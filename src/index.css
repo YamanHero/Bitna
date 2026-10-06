@@ -1,0 +1,275 @@
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --text: #1c2430;
+  --muted: #667085;
+  --border: #e3e6eb;
+  --accent: #0f6e5a;
+  --accent-soft: #e3f3ef;
+  --danger: #b42318;
+  font-family: system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  color: var(--text);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  line-height: 1.5;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.page,
+.pf {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  color: inherit;
+}
+
+.app-card:hover {
+  border-color: var(--accent);
+  text-decoration: none;
+}
+
+.app-card h2 {
+  margin: 0 0 4px;
+  color: var(--accent);
+}
+
+.app-card p {
+  margin: 0;
+  color: var(--muted);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+input,
+select,
+textarea {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+textarea {
+  width: 100%;
+  min-height: 90px;
+  resize: vertical;
+}
+
+button {
+  padding: 8px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+button.ghost {
+  background: transparent;
+  color: var(--accent);
+}
+
+button.danger {
+  background: transparent;
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ProjectFlow */
+.pf-header h1 {
+  margin: 8px 0 0;
+}
+
+.pf-header p {
+  margin: 0 0 20px;
+  color: var(--muted);
+}
+
+.pf-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+  align-items: end;
+}
+
+.pf-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.pf-project-card {
+  display: block;
+  color: inherit;
+}
+
+.pf-project-card:hover {
+  border-color: var(--accent);
+  text-decoration: none;
+}
+
+.pf-project-card h3 {
+  margin: 0 0 4px;
+}
+
+.pf-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.progress {
+  height: 8px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 10px 0 4px;
+}
+
+.progress > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.pf-detail {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+@media (max-width: 720px) {
+  .pf-detail {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stage-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.stage-btn {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: start;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.stage-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.stage-btn.done .stage-count {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.stage-count {
+  color: var(--muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.task-list {
+  list-style: none;
+  margin: 12px 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.task.done span {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+.task span {
+  flex: 1;
+}
+
+.task button {
+  padding: 2px 8px;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.row input[type='text'] {
+  flex: 1;
+  min-width: 160px;
+}
+
+.section-label {
+  display: block;
+  margin: 16px 0 4px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
