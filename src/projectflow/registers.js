@@ -3,6 +3,28 @@ import { uid } from './storage.js';
 
 export const RISKS_KEY = 'projectflow.risks.v1';
 export const DECISIONS_KEY = 'projectflow.decisions.v1';
+export const CHANGES_KEY = 'projectflow.changes.v1';
+export const PAYMENTS_KEY = 'projectflow.payments.v1';
+
+export const CR_STATUS = [
+  { value: 'open', label: 'ממתינה להחלטה' },
+  { value: 'approved', label: 'אושרה' },
+  { value: 'rejected', label: 'נדחתה' },
+  { value: 'deferred', label: 'נדחתה לשלב מאוחר' },
+];
+
+// תנאים לשחרור תשלום: אבן דרך נמסרה, התקבלה, ורק אז משלמים.
+export const PAYMENT_CHECKS = [
+  { key: 'doc', label: 'המסמך / התוצר התקבל' },
+  { key: 'comments', label: 'הערות נסגרו' },
+  { key: 'accepted', label: 'קבלה חתומה' },
+  { key: 'invoice', label: 'חשבונית תקינה' },
+];
+
+export const paymentReady = (p) => PAYMENT_CHECKS.every((c) => p.checks?.[c.key]);
+
+export const shekel = (n) =>
+  n === '' || n == null || Number.isNaN(Number(n)) ? '—' : `₪${Number(n).toLocaleString('he-IL')}`;
 
 export const KINDS = [
   { value: 'risk', label: 'סיכון (עשוי לקרות)' },

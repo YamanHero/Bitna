@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Link, NavLink, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import ChangeRequests from './ChangeRequests.jsx';
 import Dashboard from './Dashboard.jsx';
 import Decisions from './Decisions.jsx';
+import Payments from './Payments.jsx';
 import Risks from './Risks.jsx';
 import { STAGES } from './stages.js';
 import {
@@ -254,6 +256,8 @@ export default function ProjectFlow() {
           <NavLink to="/projectflow/dashboard">לוח בקרה</NavLink>
           <NavLink to="/projectflow/risks">סיכונים</NavLink>
           <NavLink to="/projectflow/decisions">החלטות</NavLink>
+          <NavLink to="/projectflow/changes">בקשות שינוי</NavLink>
+          <NavLink to="/projectflow/payments">תשלומים</NavLink>
         </nav>
       </header>
       <Routes>
@@ -261,6 +265,8 @@ export default function ProjectFlow() {
         <Route path="dashboard" element={<Dashboard store={store} />} />
         <Route path="risks" element={<Risks store={store} />} />
         <Route path="decisions" element={<Decisions store={store} />} />
+        <Route path="changes" element={<ChangeRequests store={store} />} />
+        <Route path="payments" element={<Payments store={store} />} />
         <Route path=":id" element={<ProjectDetail store={store} />} />
       </Routes>
     </div>
