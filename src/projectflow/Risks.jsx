@@ -23,6 +23,8 @@ const EMPTY = {
 export default function Risks({ store }) {
   const risks = useList(RISKS_KEY);
   const [form, setForm] = useState(EMPTY);
+  const [status, setStatus] = useState('open');
+  const [projectFilter, setProjectFilter] = useState('');
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   const projectName = (id) => store.projects.find((p) => p.id === id)?.name;
 
@@ -39,10 +41,13 @@ export default function Risks({ store }) {
     setForm(EMPTY);
   };
 
-  const sorted = [...risks.items].sort((a, b) => {
+  const sorted = risks.items
+    .filter((r) => status === 'all' || r.status === status)
+    .filter((r) => !projectFilter || r.projectId === projectFilter)
+    .sort((a, b) => {
     if (a.status !== b.status) return a.status === 'open' ? -1 : 1;
     return exposure(b) - exposure(a);
-  });
+    });
 
   return (
     <>
@@ -107,8 +112,32 @@ export default function Risks({ store }) {
         <button type="submit">הוספה</button>
       </form>
 
+      <div className="pf-toolbar">
+        <select value={status} onChange={(e) => setStatus(e.target.value)} aria-label="סינון לפי מצב">
+          <option value="open">פתוחים</option>
+          <option value="closed">סגורים</option>
+          <option value="all">הכול</option>
+        </select>
+        <select
+          value={projectFilter}
+          onChange={(e) => setProjectFilter(e.target.value)}
+          aria-label="סינון לפי פרויקט"
+        >
+          <option value="">כל הפרויקטים</option>
+          {store.projects.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {sorted.length === 0 ? (
-        <p className="muted">אין סיכונים רשומים. סיכון שעלה במכרז ממשיך איתך לביצוע.</p>
+        <p className="pf-empty">
+          {risks.items.length === 0
+            ? 'אין סיכונים רשומים. סיכון שעלה במכרז ממשיך איתך לביצוע.'
+            : 'אין רשומות שמתאימות לסינון.'}
+        </p>
       ) : (
         <div className="pf-list">
           {sorted.map((r) => {

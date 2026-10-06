@@ -1,28 +1,71 @@
+/* ביתנא – עיצוב
+   נייר ודיו: רקע בהיר ניטרלי, דיו כהה, כחול אחד לפעולה ולהתקדמות, אדום חותמת לאיחור וחסם.
+   כל הכתב ב-Arial (עם גיבוי ל-Helvetica ו-Liberation Sans), בלי פונטים חיצוניים.
+   הרכיב הבולט: פס השלבים וחותמת השלב הנוכחי. כל השאר שקט וללא קישוט. */
+
 :root {
-  --bg: #f6f7f9;
-  --surface: #ffffff;
-  --text: #1c2430;
-  --muted: #667085;
-  --border: #e3e6eb;
-  --accent: #0f6e5a;
-  --accent-soft: #e3f3ef;
-  --danger: #b42318;
-  font-family: system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
-  color: var(--text);
+  color-scheme: light dark;
+  --paper: #f3f5f9;
+  --surface: #fbfcfe;
+  --ink: #172033;
+  --muted: #566074;
+  --line: #d5dbe6;
+  --accent: #1d4ed8;
+  --accent-ink: #1e3a8a;
+  --accent-soft: #e0e9ff;
+  --on-accent: #ffffff;
+  --stamp: #a8261e;
+  --stamp-soft: #f9e1de;
+  --amber: #7a4e00;
+  --amber-soft: #f6e6bd;
+  --font: Arial, 'Helvetica Neue', Helvetica, 'Liberation Sans', sans-serif;
+  --radius: 6px;
+  font-family: var(--font);
+  color: var(--ink);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0e1320;
+    --surface: #151c2e;
+    --ink: #e8edf7;
+    --muted: #9aa7c0;
+    --line: #28324a;
+    --accent: #7ba4ff;
+    --accent-ink: #b9d0ff;
+    --accent-soft: #1b2a52;
+    --on-accent: #0a1633;
+    --stamp: #ff9a90;
+    --stamp-soft: #3b1a1f;
+    --amber: #f0c05a;
+    --amber-soft: #3a2f12;
+  }
 }
 
 * {
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
-  background: var(--bg);
-  line-height: 1.5;
+  background: var(--paper);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font);
+  line-height: 1.2;
 }
 
 a {
-  color: var(--accent);
+  color: var(--accent-ink);
   text-decoration: none;
 }
 
@@ -30,46 +73,35 @@ a:hover {
   text-decoration: underline;
 }
 
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .page,
 .pf {
-  max-width: 960px;
+  max-width: 1040px;
   margin: 0 auto;
-  padding: 24px 16px 64px;
+  padding: 28px 20px 80px;
 }
 
 .muted {
   color: var(--muted);
 }
 
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 16px;
-  margin-top: 16px;
-}
-
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
-  color: inherit;
-}
-
-.app-card:hover {
-  border-color: var(--accent);
-  text-decoration: none;
-}
-
-.app-card h2 {
-  margin: 0 0 4px;
-  color: var(--accent);
-}
-
-.app-card p {
-  margin: 0;
-  color: var(--muted);
-}
+/* ---------- בקרים ---------- */
 
 button,
 input,
@@ -81,37 +113,55 @@ textarea {
 input,
 select,
 textarea {
-  padding: 8px 10px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   background: var(--surface);
-  color: var(--text);
+  color: var(--ink);
 }
 
 textarea {
   width: 100%;
-  min-height: 90px;
+  min-height: 96px;
   resize: vertical;
 }
 
+input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  accent-color: var(--accent);
+}
+
 button {
-  padding: 8px 14px;
+  padding: 8px 16px;
   border: 1px solid var(--accent);
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
+  font-weight: 700;
   cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(1.08);
 }
 
 button.ghost {
   background: transparent;
-  color: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--line);
+}
+
+button.ghost:hover:not(:disabled) {
+  border-color: var(--accent);
+  filter: none;
 }
 
 button.danger {
   background: transparent;
-  color: var(--danger);
-  border-color: var(--danger);
+  color: var(--stamp);
+  border-color: var(--stamp);
 }
 
 button:disabled {
@@ -119,140 +169,10 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* ProjectFlow */
-.pf-header h1 {
-  margin: 8px 0 0;
-}
-
-.pf-header p {
-  margin: 0 0 20px;
+.icon-btn {
+  padding: 2px 9px;
+  border-color: transparent;
   color: var(--muted);
-}
-
-.pf-form {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 10px;
-  margin-bottom: 20px;
-  align-items: end;
-}
-
-.pf-form label {
-  display: grid;
-  gap: 4px;
-  font-size: 0.9rem;
-  color: var(--muted);
-}
-
-.pf-project-card {
-  display: block;
-  color: inherit;
-}
-
-.pf-project-card:hover {
-  border-color: var(--accent);
-  text-decoration: none;
-}
-
-.pf-project-card h3 {
-  margin: 0 0 4px;
-}
-
-.pf-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 12px;
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-
-.progress {
-  height: 8px;
-  background: var(--border);
-  border-radius: 999px;
-  overflow: hidden;
-  margin: 10px 0 4px;
-}
-
-.progress > span {
-  display: block;
-  height: 100%;
-  background: var(--accent);
-}
-
-.pf-detail {
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: 16px;
-  margin-top: 16px;
-}
-
-@media (max-width: 720px) {
-  .pf-detail {
-    grid-template-columns: 1fr;
-  }
-}
-
-.stage-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 6px;
-}
-
-.stage-btn {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  text-align: start;
-  background: var(--surface);
-  color: var(--text);
-  border: 1px solid var(--border);
-}
-
-.stage-btn.active {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-}
-
-.stage-btn.done .stage-count {
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.stage-count {
-  color: var(--muted);
-  font-size: 0.85rem;
-  white-space: nowrap;
-}
-
-.task-list {
-  list-style: none;
-  margin: 12px 0;
-  padding: 0;
-  display: grid;
-  gap: 6px;
-}
-
-.task {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.task.done span {
-  text-decoration: line-through;
-  color: var(--muted);
-}
-
-.task span {
-  flex: 1;
-}
-
-.task button {
-  padding: 2px 8px;
 }
 
 .row {
@@ -269,52 +189,453 @@ button:disabled {
 
 .section-label {
   display: block;
-  margin: 16px 0 4px;
+  margin: 18px 0 4px;
   font-size: 0.9rem;
   color: var(--muted);
 }
 
-/* ProjectFlow – ניווט, לוח בקרה, סיכונים והחלטות */
+/* ---------- דף הבית ---------- */
+
+.home-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.home-head img {
+  border-radius: 14px;
+}
+
+.home-head h1 {
+  margin: 0;
+  font-size: 2.6rem;
+  font-weight: 700;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  color: inherit;
+}
+
+.app-card {
+  display: block;
+}
+
+.app-card:hover {
+  border-color: var(--accent);
+  text-decoration: none;
+}
+
+.app-card h2 {
+  margin: 0 0 4px;
+  color: var(--accent-ink);
+}
+
+.app-card p {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* ---------- ProjectFlow: מסגרת וניווט ---------- */
+
+.pf-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pf-brand img {
+  display: block;
+  border-radius: 10px;
+}
+
+.pf-top h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.pf-top p {
+  margin: 2px 0 0;
+  color: var(--muted);
+}
+
 .pf-tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 12px;
+  gap: 0 22px;
+  margin: 20px 0 24px;
+  border-bottom: 1px solid var(--line);
 }
 
 .pf-tabs a {
-  padding: 6px 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--text);
-  font-size: 0.95rem;
+  margin-bottom: -1px;
+  padding: 10px 2px;
+  border-bottom: 3px solid transparent;
+  color: var(--muted);
+  font-weight: 700;
 }
 
 .pf-tabs a:hover {
+  color: var(--ink);
   text-decoration: none;
-  border-color: var(--accent);
 }
 
 .pf-tabs a.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
+  color: var(--ink);
+  border-bottom-color: var(--accent);
 }
 
 .pf-h2 {
-  margin: 28px 0 8px;
-  font-size: 1.15rem;
+  margin: 32px 0 8px;
+  font-size: 1.3rem;
+}
+
+.pf-title {
+  margin: 0 0 4px;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.pf-stage-title {
+  margin: 0 0 12px;
+  font-size: 1.35rem;
+}
+
+.pf-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.pf-empty {
+  margin: 0;
+  padding: 28px 4px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.pf-ok {
+  color: var(--accent-ink);
+}
+
+.pf-err {
+  color: var(--stamp);
+}
+
+.pf-panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin: 0 0 16px;
+}
+
+.pf-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+  align-items: end;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin: 0 0 20px;
+}
+
+.pf-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.pf-form input,
+.pf-form select {
+  width: 100%;
+}
+
+.pf-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.pf-toolbar input[type='search'] {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* ---------- רשימת פרויקטים ---------- */
+
+.pf-rows {
+  border-top: 1px solid var(--line);
+}
+
+.pf-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(180px, 1fr) auto;
+  gap: 8px 28px;
+  align-items: center;
+  padding: 16px 6px;
+  border-bottom: 1px solid var(--line);
+  color: inherit;
+}
+
+.pf-row:hover {
+  background: var(--surface);
+  text-decoration: none;
+}
+
+.pf-row h3 {
+  margin: 0 0 2px;
+  font-size: 1.25rem;
+}
+
+.pf-row-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.pf-pct {
+  font-family: var(--font);
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 760px) {
+  .pf-row {
+    grid-template-columns: 1fr;
+  }
+
+  .pf-row-status {
+    justify-content: flex-start;
+  }
+}
+
+/* פס השלבים וחותמת השלב הנוכחי */
+
+.rail {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rail-step {
+  position: relative;
+  flex: 1;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--line);
+}
+
+.rail-step.done {
+  background: var(--accent);
+}
+
+.rail-step.current {
+  height: 16px;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.stamp {
+  display: inline-block;
+  padding: 1px 10px;
+  border: 2px solid var(--accent);
+  border-radius: 4px;
+  color: var(--accent-ink);
+  font-size: 0.9rem;
+  font-weight: 700;
+  transform: rotate(-1.5deg);
+}
+
+.stamp.finished {
+  border-style: dashed;
+  color: var(--muted);
+  border-color: var(--muted);
+}
+
+/* ---------- פרטי פרויקט ---------- */
+
+.pf-detail-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.pf-detail {
+  display: grid;
+  grid-template-columns: 270px 1fr;
+  gap: 28px;
+  margin-top: 24px;
+}
+
+@media (max-width: 760px) {
+  .pf-detail {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.stage-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-inline-start: 2px solid var(--line);
+  align-self: start;
+}
+
+.stage-btn {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-inline-start: -2px;
+  padding: 8px 12px;
+  text-align: start;
+  background: transparent;
+  color: var(--ink);
+  border: 0;
+  border-inline-start: 4px solid transparent;
+  border-radius: 0;
+  font-weight: 400;
+}
+
+.stage-btn:hover:not(:disabled) {
+  background: var(--surface);
+  filter: none;
+}
+
+.stage-btn.active {
+  background: var(--accent-soft);
+  border-inline-start-color: var(--accent);
+  font-weight: 700;
+}
+
+.stage-count {
+  color: var(--muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.stage-btn.done .stage-count {
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+.stage-count.late {
+  color: var(--stamp);
+  font-weight: 700;
+}
+
+.pf-gate {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-inline-start: 4px solid var(--amber);
+  border-radius: var(--radius);
+  background: var(--amber-soft);
+}
+
+.task-list {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.task label {
+  flex: 1;
+  cursor: pointer;
+}
+
+.task.done label {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.pf-danger-zone {
+  margin-top: 32px;
+}
+
+/* ---------- לוח בקרה, סיכונים, החלטות, שינויים, תשלומים ---------- */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  border-block: 1px solid var(--line);
+}
+
+.stat {
+  display: grid;
+  gap: 2px;
+  padding: 14px 16px;
+  border-inline-start: 1px solid var(--line);
+}
+
+.stat:first-child {
+  border-inline-start: 0;
+}
+
+.stat b {
+  font-family: var(--font);
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.stat-bad b {
+  color: var(--stamp);
 }
 
 .pf-list {
   display: grid;
-  gap: 10px;
+  border-top: 1px solid var(--line);
 }
 
 .pf-item {
   display: grid;
   gap: 6px;
+  padding: 14px 4px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
 }
 
 .pf-item.closed {
@@ -332,77 +653,136 @@ button:disabled {
   margin: 0;
 }
 
-.pf-link {
-  display: grid;
-}
-
 .pf-link:hover {
-  border-color: var(--accent);
+  background: var(--surface);
   text-decoration: none;
 }
 
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 10px;
+.pf-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  align-items: center;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--line);
+  color: inherit;
 }
 
-.stat {
+.pf-line:hover {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px;
+  text-decoration: none;
+}
+
+.pf-line.late strong {
+  color: var(--stamp);
+}
+
+.pf-filter {
   display: grid;
-  gap: 2px;
-}
-
-.stat b {
-  font-size: 1.8rem;
-  line-height: 1.1;
-}
-
-.stat span {
-  color: var(--muted);
+  gap: 4px;
+  max-width: 320px;
+  margin: 16px 0 12px;
   font-size: 0.9rem;
+  color: var(--muted);
 }
 
-.stat-bad b {
-  color: var(--danger);
+.checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 4px 12px;
+  font-size: 0.95rem;
+}
+
+.checks label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .badge {
-  padding: 2px 10px;
+  display: inline-block;
+  padding: 1px 10px;
   border-radius: 999px;
+  background: var(--line);
+  color: var(--ink);
   font-size: 0.8rem;
-  background: var(--border);
+  font-weight: 700;
   white-space: nowrap;
 }
 
-.badge.high {
-  background: #fee4e2;
-  color: var(--danger);
+.badge.high,
+.badge.cr-rejected {
+  background: var(--stamp-soft);
+  color: var(--stamp);
 }
 
-.badge.mid {
-  background: #fef0c7;
-  color: #93370d;
+.badge.mid,
+.badge.cr-deferred {
+  background: var(--amber-soft);
+  color: var(--amber);
 }
 
-.badge.low {
+.badge.low,
+.badge.cr-approved {
   background: var(--accent-soft);
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 
 .kind {
-  font-size: 0.85rem;
   color: var(--muted);
+  font-size: 0.85rem;
 }
 
-.kind-blocker {
-  color: var(--danger);
-  font-weight: 600;
-}
-
+.kind-blocker,
 .warn {
-  color: var(--danger);
+  color: var(--stamp);
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  button,
+  a,
+  .pf-row,
+  .pf-line {
+    transition: background-color 0.12s, border-color 0.12s, color 0.12s;
+  }
+}
+
+/* סיכום בדף הבית */
+
+.app-stat {
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+
+.app-stat .warn {
+  margin-inline-start: 10px;
+}
+
+/* הדפסה */
+
+@media print {
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  .pf-tabs,
+  .pf-toolbar,
+  .pf-brand,
+  .pf-danger-zone,
+  button {
+    display: none !important;
+  }
+
+  .pf-detail {
+    grid-template-columns: 1fr;
+  }
+
+  .stage-list {
+    display: none;
+  }
 }

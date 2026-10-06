@@ -1,19 +1,13 @@
 import { Link } from 'react-router-dom';
 import { STAGES } from './stages.js';
-import { currentStage, overallProgress, stageStatus } from './storage.js';
+import { currentStage, overallProgress, overdueStages, stageStatus } from './storage.js';
 import { RISKS_KEY, exposure, kindLabel, useList } from './registers.js';
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
+const addDays = (n) => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10);
 
 // שלבי המכרז: מהכנת מסמכים ועד החלטה ואישור.
 const TENDER_IDS = ['tender_docs', 'publication', 'clarifications', 'bids', 'evaluation', 'approval'];
-
-function overdueStages(project, today) {
-  return STAGES.filter((s) => {
-    const due = project.stageMeta?.[s.id]?.due;
-    return due && due < today && !stageStatus(project, s.id).complete;
-  });
-}
 
 function nextTask(project) {
   const stage = currentStage(project);
@@ -42,6 +36,15 @@ export default function Dashboard({ store }) {
   const highRisks = openRisks.filter((r) => exposure(r) >= 6);
   const blockers = openRisks.filter((r) => r.kind === 'blocker');
   const late = active.flatMap((p) => overdueStages(p, today).map((s) => ({ p, s })));
+  const weekEnd = addDays(7);
+  const soon = active
+    .flatMap((p) =>
+      STAGES.filter((s) => {
+        const due = p.stageMeta?.[s.id]?.due;
+        return due && due >= today && due <= weekEnd && !stageStatus(p, s.id).complete;
+      }).map((s) => ({ p, s, due: p.stageMeta[s.id].due }))
+    )
+    .sort((a, b) => a.due.localeCompare(b.due));
   const projectName = (id) => store.projects.find((p) => p.id === id)?.name;
 
   return (
@@ -55,9 +58,31 @@ export default function Dashboard({ store }) {
         <Stat n={blockers.length} label="חסמים פתוחים" tone={blockers.length ? 'bad' : ''} />
       </div>
 
+      {(late.length > 0 || soon.length > 0) && (
+        <>
+          <h2 className="pf-h2">מועדים</h2>
+          <div className="pf-list">
+            {late.map(({ p, s }) => (
+              <Link key={`${p.id}-${s.id}`} to={`/projectflow/${p.id}`} className="pf-line late">
+                <strong>{p.name}</strong>
+                <span>{s.title}</span>
+                <span className="badge high">באיחור, יעד {p.stageMeta[s.id].due}</span>
+              </Link>
+            ))}
+            {soon.map(({ p, s, due }) => (
+              <Link key={`${p.id}-${s.id}-soon`} to={`/projectflow/${p.id}`} className="pf-line">
+                <strong>{p.name}</strong>
+                <span>{s.title}</span>
+                <span className="badge mid">השבוע, יעד {due}</span>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
+
       <h2 className="pf-h2">הפעולה הבאה בכל פרויקט</h2>
       {active.length === 0 ? (
-        <p className="muted">אין פרויקטים פעילים. פתחו פרויקט בלשונית פרויקטים.</p>
+        <p className="pf-empty">אין פרויקטים פעילים. פתחו פרויקט בלשונית פרויקטים.</p>
       ) : (
         <div className="pf-list">
           {active.map((p) => {
@@ -73,7 +98,12 @@ export default function Dashboard({ store }) {
                 {next && (
                   <div>
                     <span className="muted">שלב: {next.stage.title}</span>
-                    {next.task && <div>← {next.task.title}</div>}
+                    {next.task && (
+                      <div>
+                        <span className="muted">הבא: </span>
+                        {next.task.title}
+                      </div>
+                    )}
                   </div>
                 )}
                 {(lateCount > 0 || projectBlockers.length > 0) && (
