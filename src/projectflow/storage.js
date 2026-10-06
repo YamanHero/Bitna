@@ -39,6 +39,7 @@ export const catalogStage = (id) => STAGES.find((s) => s.id === id);
 
 export function makeProject({ name, type, owner, budget, targetDate = '', template = 'full' }) {
   const ids = (TEMPLATES.find((t) => t.id === template) || TEMPLATES[0]).ids;
+  const now = new Date().toISOString();
   const chosen = STAGES.filter((s) => ids.includes(s.id));
   // סדר השלבים לפי התבנית (במסגרת, ההצעות באות לפני ההערכה וכדומה).
   const ordered = ids.map((id) => chosen.find((s) => s.id === id)).filter(Boolean);
@@ -49,7 +50,9 @@ export function makeProject({ name, type, owner, budget, targetDate = '', templa
     owner,
     budget,
     targetDate,
-    createdAt: new Date().toISOString(),
+    createdAt: now,
+    status: 'prep',
+    statusLog: [{ status: 'prep', at: now }],
     stages: ordered.map(({ id, title }) => ({ id, title })),
     tasks: ordered.flatMap((s) =>
       s.tasks.map((title) => ({ id: uid(), stage: s.id, title, done: false }))

@@ -1647,3 +1647,27 @@ button.sm {
     font-size: 0.78rem;
   }
 }
+
+/* ---- סטטוס פרויקט וסטופר ---- */
+.status-card{background:var(--card,#fff);border:1px solid var(--line,#dde3ee);border-radius:16px;padding:16px;margin:12px 0;display:grid;gap:12px}
+.status-card.hold{border-color:#d99a1e;background:color-mix(in srgb,#f5b73b 10%,var(--card,#fff))}
+.status-top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start}
+.status-kicker{font-size:12px;opacity:.65}
+.status-name{margin:2px 0;font-size:26px}
+.status-hint{margin:0;opacity:.75;font-size:14px}
+.stopwatch{text-align:left;min-width:0}
+.sw-time{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--accent,#2f6bff)}
+.sw-label{font-size:12px;opacity:.75}
+.sw-date{margin-top:6px}
+.status-facts{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;opacity:.85}
+.status-actions{display:flex;gap:8px;flex-wrap:wrap}
+.status-actions button{min-height:46px;flex:1 1 auto}
+.status-chips{display:flex;flex-wrap:wrap;gap:6px}
+.status-history{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.status-history li{display:flex;gap:12px;justify-content:space-between;font-size:13px;border-bottom:1px solid var(--line,#dde3ee);padding:6px 0}
+.status-chip{display:inline-flex;gap:6px;align-items:center;padding:4px 10px;border-radius:999px;background:color-mix(in srgb,var(--accent,#2f6bff) 14%,transparent);font-weight:600;font-size:13px}
+.status-chip small{opacity:.7;font-weight:400}
+.status-chip.hold{background:color-mix(in srgb,#f5b73b 30%,transparent)}
+.status-rail{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
+button.link{background:none;border:0;color:var(--accent,#2f6bff);padding:0;cursor:pointer;font:inherit;text-decoration:underline}
+@media(max-width:700px){.status-name{font-size:22px}.sw-time{font-size:24px}.stopwatch{text-align:right}}

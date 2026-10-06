@@ -1,27 +1,18 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { currentStage, overallProgress, overdueStages, daysLeft, stagesOf } from './storage.js';
+import { currentStage, overallProgress, overdueStages, daysLeft } from './storage.js';
+import { STATUS_PHASE, baseStatus, daysIn, statusInfo, statusOf } from './status.js';
 
-// חמישה שלבי-על במקום שלושה-עשר שלבים: הלוח נכנס במסך ונוח לתפעול.
+// חמישה שלבי-על, לפי סטטוס הפרויקט. הצבע נקבע לפי שלב-העל.
 export const PHASES = [
-  { id: 'prep', label: 'הכנה', stages: ['needs', 'budget', 'tender_docs'], color: 'var(--ph-prep)' },
-  { id: 'tender', label: 'מכרז', stages: ['publication', 'clarifications', 'bids'], color: 'var(--ph-tender)' },
-  { id: 'select', label: 'בחירה וחוזה', stages: ['evaluation', 'approval', 'contract'], color: 'var(--ph-select)' },
-  { id: 'deliver', label: 'ביצוע וקבלה', stages: ['delivery', 'acceptance'], color: 'var(--ph-deliver)' },
-  { id: 'close', label: 'סגירה', stages: ['closure', '_done'], color: 'var(--ph-close)' },
+  { id: 'prep', label: 'הכנה', color: 'var(--ph-prep)' },
+  { id: 'tender', label: 'מכרז והתקשרות', color: 'var(--ph-tender)' },
+  { id: 'build', label: 'אפיון ופיתוח', color: 'var(--ph-select)' },
+  { id: 'launch', label: 'בדיקות והפעלה', color: 'var(--ph-deliver)' },
+  { id: 'end', label: 'אחריות וסגירה', color: 'var(--ph-close)' },
 ];
 
-// שלב מותאם אישית משויך לשלב-העל של השלב הסטנדרטי שלפניו.
-const phaseOf = (p) => {
-  const cur = currentStage(p);
-  if (!cur) return PHASES[PHASES.length - 1];
-  const list = stagesOf(p);
-  for (let i = list.findIndex((s) => s.id === cur.id); i >= 0; i -= 1) {
-    const ph = PHASES.find((x) => x.stages.includes(list[i].id));
-    if (ph) return ph;
-  }
-  return PHASES[0];
-};
+const phaseOf = (p) => PHASES.find((ph) => ph.id === STATUS_PHASE[baseStatus(p)]) || PHASES[0];
 
 export default function Board({ projects, store }) {
   const [phase, setPhase] = useState(() => PHASES.find((ph) => projects.some((p) => phaseOf(p).id === ph.id))?.id || 'prep');
@@ -84,7 +75,10 @@ export default function Board({ projects, store }) {
                       <strong>{p.name}</strong>
                       <span className="muted">{p.owner || '—'}</span>
                     </Link>
-                    <span className="board-stage">{stage ? stage.title : 'הושלם'}</span>
+                    <span className="board-stage">
+                      {statusInfo(statusOf(p)).label}
+                      {statusOf(p) !== 'hold' && statusOf(p) !== 'closed' && ` · ${daysIn(p)} ימים`}
+                    </span>
                     <span className="bar">
                       <i style={{ width: `${overallProgress(p)}%` }} />
                     </span>

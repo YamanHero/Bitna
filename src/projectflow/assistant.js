@@ -1,6 +1,7 @@
 import { STAGES } from './stages.js';
 import { currentStage, daysLeft, overallProgress, overdueStages, stageStatus } from './storage.js';
 import { exposure, kindLabel } from './registers.js';
+import { daysIn, statusInfo, statusOf } from './status.js';
 
 // ידע מובנה לכל שלב: איך מבצעים אותו, ורעיונות לקידום. כללים קבועים, לא מודל שפה.
 export const GUIDE = {
@@ -106,6 +107,18 @@ export function analyze(project, { risks = [], changes = [], payments = [] } = {
     if (r.kind === 'blocker' || exposure(r) >= 6) {
       delays.push({ level: r.kind === 'blocker' ? 'high' : 'mid', text: `${kindLabel(r.kind)} פתוח: ${r.title}${r.owner ? ` (אחראי: ${r.owner})` : ''}.` });
     }
+  }
+
+  const st = statusOf(project);
+  const info = statusInfo(st);
+  const inDays = daysIn(project);
+  if (st === 'hold') {
+    delays.push({ level: 'mid', text: `הפרויקט מושהה כבר ${inDays} ימים.` });
+  } else if (info.typical && inDays > info.typical) {
+    delays.push({
+      level: 'mid',
+      text: `הפרויקט בסטטוס "${info.label}" כבר ${inDays} ימים, יותר מהרגיל (בדרך כלל עד ${info.typical}).`,
+    });
   }
 
   const openCr = changes.filter((c) => c.projectId === project.id && c.status === 'open').length;

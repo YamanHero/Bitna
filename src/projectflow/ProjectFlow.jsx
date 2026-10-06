@@ -11,6 +11,7 @@ import Decisions from './Decisions.jsx';
 import Payments from './Payments.jsx';
 import { TEAM_KEY, useList } from './registers.js';
 import Tasks from './Tasks.jsx';
+import StatusCard, { StatusChip, StatusRail } from './StatusCard.jsx';
 import Risks from './Risks.jsx';
 import { STAGES } from './stages.js';
 import {
@@ -246,11 +247,9 @@ function ProjectList({ store }) {
                     {p.targetDate && <span>יעד הפעלה: {p.targetDate}</span>}
                   </div>
                 </div>
-                <StageRail project={p} />
+                <StatusRail project={p} />
                 <div className="pf-row-status">
-                  <span className={`stamp${stage ? '' : ' finished'}`}>
-                    {stage ? stage.title : 'הושלם'}
-                  </span>
+                  <StatusChip project={p} />
                   <span className="pf-pct">{pct}%</span>
                   {late > 0 && <span className="badge high">{late} באיחור</span>}
                   <TargetBadge project={p} />
@@ -486,12 +485,12 @@ function Detail({ project, store }) {
         </div>
       )}
 
-      <StageRail project={project} />
+      <StatusCard project={project} patch={patch} />
 
       <div className="pf-detail">
         <div className="stage-col">
           <div className="stage-head">
-            <h3>שלבים ({stages.length})</h3>
+            <h3>משימות לפי שלב ({stages.length})</h3>
             <button type="button" className="ghost sm" onClick={() => setManage((v) => !v)}>
               {manage ? 'סיום עריכה' : 'ניהול שלבים'}
             </button>
