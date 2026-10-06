@@ -325,7 +325,6 @@ function Detail({ project, store }) {
   const budget = formatBudget(project.budget);
   const gate = active ? openBefore(project, active.id) : { open: 0 };
   const activeDone = active ? stageStatus(project, active.id).complete : false;
-  const missing = STAGES.filter((s) => !stages.some((x) => x.id === s.id));
 
   const patch = (fn) => store.update(project.id, fn);
 
@@ -363,14 +362,6 @@ function Detail({ project, store }) {
 
   // ---- שלבים ----
   const setStages = (fn) => patch((p) => ({ ...p, stages: fn(stagesOf(p)) }));
-  const moveStage = (i, dir) =>
-    setStages((list) => {
-      const j = i + dir;
-      if (j < 0 || j >= list.length) return list;
-      const next = [...list];
-      [next[i], next[j]] = [next[j], next[i]];
-      return next;
-    });
   const renameStage = (id, title) =>
     setStages((list) => list.map((s) => (s.id === id ? { ...s, title } : s)));
   const removeStage = (s) => {
@@ -386,6 +377,45 @@ function Detail({ project, store }) {
       };
     });
     if (sel === s.id) setSel(null);
+  };
+
+  // החלפת תבנית: מוסיפים שלבים חסרים ומסירים שלבים סטנדרטיים שאינם בתבנית (שלבים אישיים נשארים).
+  const applyTemplate = (tpl) => {
+    const have = stages.map((x) => x.id);
+    const drop = stages.filter((x) => catalogStage(x.id) && !tpl.ids.includes(x.id));
+    const lost = project.tasks.filter((t) => drop.some((x) => x.id === t.stage));
+    const doneLost = lost.filter((t) => t.done).length;
+    if (
+      (drop.length || doneLost) &&
+      !window.confirm(
+        `מעבר לתבנית "${tpl.label}": יוסרו ${drop.length} שלבים${lost.length ? ` ו-${lost.length} משימות` : ''}${doneLost ? ` (מהן ${doneLost} שסומנו כבוצעו)` : ''}. להמשיך?`
+      )
+    ) return;
+    patch((p) => {
+      const custom = stagesOf(p).filter((x) => !catalogStage(x.id));
+      const kept = stagesOf(p).filter((x) => tpl.ids.includes(x.id));
+      const added = tpl.ids.filter((id) => !have.includes(id)).map((id) => catalogStage(id));
+      const std = tpl.ids
+        .map((id) => kept.find((x) => x.id === id) || added.find((x) => x?.id === id))
+        .filter(Boolean)
+        .map(({ id, title }) => ({ id, title }));
+      const ci = std.findIndex((x) => x.id === 'closure');
+      const merged = ci === -1 ? [...std, ...custom] : [...std.slice(0, ci), ...custom, ...std.slice(ci)];
+      const gone = drop.map((x) => x.id);
+      return {
+        ...p,
+        stages: merged,
+        tasks: [
+          ...p.tasks.filter((t) => !gone.includes(t.stage)),
+          ...added.flatMap((c) => c.tasks.map((title) => ({ id: uid(), stage: c.id, title, done: false }))),
+        ],
+      };
+    });
+  };
+  const toggleStage = (c) => {
+    const cur = stages.find((x) => x.id === c.id);
+    if (cur) removeStage(cur);
+    else addCatalogStage(c.id);
   };
   // שלב חדש נכנס לפני "סיכום וסגירה" אם הוא קיים, אחרת בסוף.
   const insertIndex = (list) => {
@@ -492,35 +522,16 @@ function Detail({ project, store }) {
           <div className="stage-head">
             <h3>משימות לפי שלב ({stages.length})</h3>
             <button type="button" className="ghost sm" onClick={() => setManage((v) => !v)}>
-              {manage ? 'סיום עריכה' : 'ניהול שלבים'}
+              {manage ? 'סיום' : 'התאמת שלבים'}
             </button>
           </div>
 
+          {!manage && (
           <ol className="stage-list">
             {stages.map((s, i) => {
               const st = stageStatus(project, s.id);
               const due = project.stageMeta[s.id]?.due;
               const late = due && due < today && !st.complete;
-              if (manage) {
-                return (
-                  <li key={s.id} className="stage-edit">
-                    <input
-                      value={s.title}
-                      onChange={(e) => renameStage(s.id, e.target.value)}
-                      aria-label="שם השלב"
-                    />
-                    <button type="button" className="ghost icon-btn" onClick={() => moveStage(i, -1)} disabled={i === 0} aria-label="הזזה למעלה">
-                      ▲
-                    </button>
-                    <button type="button" className="ghost icon-btn" onClick={() => moveStage(i, 1)} disabled={i === stages.length - 1} aria-label="הזזה למטה">
-                      ▼
-                    </button>
-                    <button type="button" className="danger icon-btn" onClick={() => removeStage(s)} aria-label={`הסרת השלב ${s.title}`}>
-                      ✕
-                    </button>
-                  </li>
-                );
-              }
               return (
                 <li key={s.id}>
                   <button
@@ -541,22 +552,38 @@ function Detail({ project, store }) {
             })}
             {stages.length === 0 && <li className="muted">אין שלבים. הוסיפו שלב כדי להתחיל.</li>}
           </ol>
+          )}
 
           {manage && (
-            <div className="stage-add">
-              {missing.length > 0 && (
-                <label>
-                  הוספת שלב סטנדרטי
-                  <select value="" onChange={(e) => e.target.value && addCatalogStage(e.target.value)}>
-                    <option value="">בחרו שלב להוספה…</option>
-                    {missing.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.title}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )}
+            <div className="stage-picker">
+              <p className="picker-lead">בחרו תבנית בסיס, ואז סמנו או בטלו שלבים לפי הצורך.</p>
+              <div className="chips" role="group" aria-label="תבניות">
+                {TEMPLATES.filter((t) => t.id !== 'empty').map((t) => (
+                  <button key={t.id} type="button" className="chip" onClick={() => applyTemplate(t)}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+              <ul className="pick-list">
+                {STAGES.map((c) => {
+                  const on = stages.some((x) => x.id === c.id);
+                  return (
+                    <li key={c.id}>
+                      <label className={`pick${on ? ' on' : ''}`}>
+                        <input type="checkbox" checked={on} onChange={() => toggleStage(c)} />
+                        <span>{c.title}</span>
+                        <small>{c.tasks.length} משימות</small>
+                      </label>
+                    </li>
+                  );
+                })}
+                {stages.filter((x) => !catalogStage(x.id)).map((s) => (
+                  <li key={s.id} className="pick custom">
+                    <input value={s.title} onChange={(e) => renameStage(s.id, e.target.value)} aria-label="שם השלב" />
+                    <button type="button" className="danger icon-btn" onClick={() => removeStage(s)} aria-label={`הסרת השלב ${s.title}`}>✕</button>
+                  </li>
+                ))}
+              </ul>
               <form className="row" onSubmit={addCustomStage}>
                 <input
                   type="text"

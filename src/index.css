@@ -1671,3 +1671,15 @@ button.sm {
 .status-rail{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
 button.link{background:none;border:0;color:var(--accent,#2f6bff);padding:0;cursor:pointer;font:inherit;text-decoration:underline}
 @media(max-width:700px){.status-name{font-size:22px}.sw-time{font-size:24px}.stopwatch{text-align:right}}
+
+/* ---- בחירת שלבים מתבנית ---- */
+.stage-picker{display:grid;gap:10px;min-width:0}
+.picker-lead{margin:0;font-size:13px;opacity:.75}
+.pick-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.pick{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line,#dde3ee);border-radius:12px;min-height:46px;cursor:pointer;background:var(--card,#fff)}
+.pick.on{border-color:var(--accent,#2f6bff);background:color-mix(in srgb,var(--accent,#2f6bff) 9%,transparent)}
+.pick input[type=checkbox]{width:22px;height:22px;flex:none}
+.pick span{flex:1;min-width:0}
+.pick small{opacity:.6;white-space:nowrap}
+.pick.custom{cursor:default}
+.pick.custom input[type=text],.pick.custom input:not([type]){flex:1;min-width:0}
