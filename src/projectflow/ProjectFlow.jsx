@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, NavLink, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { SyncBadge } from '../lib/AuthGate.jsx';
+import { ThemePicker } from '../lib/theme.jsx';
+import Assistant from './Assistant.jsx';
 import Backup from './Backup.jsx';
 import ChangeRequests from './ChangeRequests.jsx';
 import Dashboard from './Dashboard.jsx';
@@ -476,14 +478,16 @@ const ICONS = {
   changes: 'M4 7h12m0 0-3-3m3 3-3 3M20 17H8m0 0 3-3m-3 3 3 3',
   payments: 'M3 7h18v10H3zM3 11h18M7 15h3',
   backup: 'M12 4v11m0 0-4-4m4 4 4-4M5 20h14',
+  assistant: 'M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8zM18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8z',
   more: 'M5 12h.01M12 12h.01M19 12h.01',
 };
 
 const NAV = [
   ['', 'פרויקטים', 'projects'],
+  ['assistant', 'עוזר', 'assistant'],
   ['dashboard', 'לוח בקרה', 'dashboard'],
   ['risks', 'סיכונים', 'risks'],
-  ['decisions', 'החלטות', 'decisions'],
+  ['decisions', 'החלטות', 'decisions', true],
   ['changes', 'בקשות שינוי', 'changes', true],
   ['payments', 'תשלומים', 'payments', true],
   ['backup', 'גיבוי', 'backup', true],
@@ -501,6 +505,8 @@ function More() {
           </Link>
         ))}
       </div>
+      <h2 className="pf-h2">צבע האפליקציה</h2>
+      <ThemePicker />
       <h2 className="pf-h2">חשבון</h2>
       <SyncBadge />
     </>
@@ -548,6 +554,7 @@ export default function ProjectFlow() {
           </NavLink>
         </nav>
         <div className="side-account">
+          <ThemePicker />
           <SyncBadge />
         </div>
       </aside>
@@ -555,6 +562,7 @@ export default function ProjectFlow() {
         {heading && <h1 className="pf-page">{heading}</h1>}
         <Routes>
           <Route index element={<ProjectList store={store} />} />
+          <Route path="assistant" element={<Assistant store={store} />} />
           <Route path="dashboard" element={<Dashboard store={store} />} />
           <Route path="risks" element={<Risks store={store} />} />
           <Route path="decisions" element={<Decisions store={store} />} />
