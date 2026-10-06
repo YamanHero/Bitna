@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { Link, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import { Link, NavLink, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import Dashboard from './Dashboard.jsx';
+import Decisions from './Decisions.jsx';
+import Risks from './Risks.jsx';
 import { STAGES } from './stages.js';
 import {
   currentStage,
@@ -244,9 +247,20 @@ export default function ProjectFlow() {
         <Link to="/">→ בית</Link>
         <h1>ProjectFlow</h1>
         <p>ניהול מחזור חיים של פרויקט – ממכרז ועד אספקה</p>
+        <nav className="pf-tabs" aria-label="ניווט ProjectFlow">
+          <NavLink to="/projectflow" end>
+            פרויקטים
+          </NavLink>
+          <NavLink to="/projectflow/dashboard">לוח בקרה</NavLink>
+          <NavLink to="/projectflow/risks">סיכונים</NavLink>
+          <NavLink to="/projectflow/decisions">החלטות</NavLink>
+        </nav>
       </header>
       <Routes>
         <Route index element={<ProjectList store={store} />} />
+        <Route path="dashboard" element={<Dashboard store={store} />} />
+        <Route path="risks" element={<Risks store={store} />} />
+        <Route path="decisions" element={<Decisions store={store} />} />
         <Route path=":id" element={<ProjectDetail store={store} />} />
       </Routes>
     </div>
