@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="ביתנא">
+  <rect width="512" height="512" rx="112" fill="#0f6e5a"/>
+  <path d="M256 104 108 236v160a28 28 0 0 0 28 28h240a28 28 0 0 0 28-28V236Z" fill="#f4f8f6"/>
+  <path d="M190 308l46 46 88-100" fill="none" stroke="#0f6e5a" stroke-width="38" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

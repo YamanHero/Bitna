@@ -4,14 +4,17 @@ const APPS = [
   {
     to: '/projectflow',
     title: 'ProjectFlow',
-    desc: 'ניהול מחזור חיים של פרויקט רכש ו-IT – ממכרז ועד אספקה',
+    desc: 'מעקב אחרי פרויקט רכש ו-IT, ממכרז ועד אספקה: שלבים, סיכונים, החלטות, שינויים ותשלומים.',
   },
 ];
 
 export default function Home() {
   return (
     <main className="page">
-      <h1>ביתנא</h1>
+      <div className="home-head">
+        <img src="/favicon.svg" alt="" width="56" height="56" />
+        <h1>ביתנא</h1>
+      </div>
       <p className="muted">האפליקציות שלנו במקום אחד</p>
       <div className="cards">
         {APPS.map((a) => (

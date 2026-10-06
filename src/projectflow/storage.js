@@ -35,6 +35,23 @@ export function stageStatus(project, stageId) {
   return { total: ts.length, done, complete: ts.length > 0 && done === ts.length };
 }
 
+// שלבים שמועד היעד שלהם עבר והם עדיין לא הושלמו.
+export function overdueStages(project, today = new Date().toISOString().slice(0, 10)) {
+  return STAGES.filter((s) => {
+    const due = project.stageMeta?.[s.id]?.due;
+    return due && due < today && !stageStatus(project, s.id).complete;
+  });
+}
+
+// כמה משימות פתוחות נשארו בשלב שלפני השלב הנתון.
+export function openBefore(project, stageId) {
+  const i = STAGES.findIndex((s) => s.id === stageId);
+  if (i <= 0) return { stage: null, open: 0 };
+  const stage = STAGES[i - 1];
+  const st = stageStatus(project, stage.id);
+  return { stage, open: st.total - st.done };
+}
+
 export function currentStage(project) {
   return STAGES.find((s) => !stageStatus(project, s.id).complete) || null;
 }
