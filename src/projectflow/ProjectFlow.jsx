@@ -4,6 +4,7 @@ import { SyncBadge } from '../lib/AuthGate.jsx';
 import { ThemePicker } from '../lib/theme.jsx';
 import Assistant from './Assistant.jsx';
 import Backup from './Backup.jsx';
+import Board from './Board.jsx';
 import ChangeRequests from './ChangeRequests.jsx';
 import Dashboard from './Dashboard.jsx';
 import Decisions from './Decisions.jsx';
@@ -209,31 +210,7 @@ function ProjectList({ store }) {
       ) : shown.length === 0 ? (
         <p className="pf-empty">לא נמצאו פרויקטים שמתאימים לחיפוש או לסינון.</p>
       ) : view === 'board' ? (
-        <div className="board">
-          {[...STAGES, { id: '_done', title: 'הושלם' }].map((col) => {
-            const items = shown.filter((p) =>
-              col.id === '_done' ? !currentStage(p) : currentStage(p)?.id === col.id
-            );
-            return (
-              <section key={col.id} className="board-col" aria-label={col.title}>
-                <h3>
-                  {col.title} <span>{items.length}</span>
-                </h3>
-                {items.map((p) => (
-                  <Link key={p.id} to={`/projectflow/${p.id}`} className="board-card">
-                    <strong>{p.name}</strong>
-                    <span className="muted">{p.owner || TYPES[p.type]}</span>
-                    <span className="bar"><i style={{ width: `${overallProgress(p)}%` }} /></span>
-                    <span className="board-foot">
-                      <span>{overallProgress(p)}%</span>
-                      {overdueStages(p).length > 0 && <span className="badge high">באיחור</span>}
-                    </span>
-                  </Link>
-                ))}
-              </section>
-            );
-          })}
-        </div>
+        <Board projects={shown} store={store} />
       ) : (
         <div className="pf-rows">
           {shown.map((p) => {

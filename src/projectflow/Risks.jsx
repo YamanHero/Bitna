@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import RiskLibrary from './RiskLibrary.jsx';
+import { CATEGORIES } from './riskLibrary.js';
 import {
   KINDS,
   LEVELS,
@@ -25,6 +27,7 @@ export default function Risks({ store }) {
   const [form, setForm] = useState(EMPTY);
   const [status, setStatus] = useState('open');
   const [projectFilter, setProjectFilter] = useState('');
+  const [lib, setLib] = useState(false);
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   const projectName = (id) => store.projects.find((p) => p.id === id)?.name;
 
@@ -51,6 +54,13 @@ export default function Risks({ store }) {
 
   return (
     <>
+      <div className="pf-toolbar">
+        <button type="button" onClick={() => setLib((v) => !v)}>
+          {lib ? 'סגירת הספרייה' : 'ספריית סיכונים מומלצת'}
+        </button>
+      </div>
+      {lib && <RiskLibrary store={store} risks={risks} onClose={() => setLib(false)} />}
+
       <form className="card pf-form" onSubmit={submit}>
         <label>
           תיאור
@@ -150,6 +160,11 @@ export default function Risks({ store }) {
                 </div>
                 <div className="pf-meta">
                   <span className={`kind kind-${r.kind}`}>{kindLabel(r.kind)}</span>
+                  {r.category && (
+                    <span className="tag" style={{ '--ph': CATEGORIES.find((c) => c.id === r.category)?.color }}>
+                      {CATEGORIES.find((c) => c.id === r.category)?.label}
+                    </span>
+                  )}
                   {projectName(r.projectId) && <span>{projectName(r.projectId)}</span>}
                   {r.owner && <span>אחראי: {r.owner}</span>}
                   {r.due && <span>יעד: {r.due}</span>}
