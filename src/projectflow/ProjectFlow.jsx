@@ -11,7 +11,7 @@ import Decisions from './Decisions.jsx';
 import Payments from './Payments.jsx';
 import { TEAM_KEY, useList } from './registers.js';
 import Tasks from './Tasks.jsx';
-import StatusCard, { StatusChip, StatusRail } from './StatusCard.jsx';
+import StatusCard, { MilestonesCard, StatusChip, StatusRail } from './StatusCard.jsx';
 import Risks from './Risks.jsx';
 import { STAGES } from './stages.js';
 import {
@@ -473,14 +473,14 @@ function Detail({ project, store }) {
   const deleteProject = () => {
     if (window.confirm(`למחוק את "${project.name}"?`)) {
       store.remove(project.id);
-      navigate('/projectflow');
+      navigate('/projectflow/projects');
     }
   };
 
   return (
     <>
       <p>
-        <Link to="/projectflow">חזרה לכל הפרויקטים</Link>
+        <Link to="/projectflow/projects">חזרה לכל הפרויקטים</Link>
       </p>
 
       {editing ? (
@@ -516,6 +516,7 @@ function Detail({ project, store }) {
       )}
 
       <StatusCard project={project} patch={patch} />
+      <MilestonesCard project={project} patch={patch} />
 
       <div className="pf-detail">
         <div className="stage-col">
@@ -689,7 +690,7 @@ function ProjectDetail({ store }) {
   if (!project) {
     return (
       <p className="pf-empty">
-        הפרויקט לא נמצא. <Link to="/projectflow">חזרה לרשימה</Link>
+        הפרויקט לא נמצא. <Link to="/projectflow/projects">חזרה לרשימה</Link>
       </p>
     );
   }
@@ -710,10 +711,10 @@ const ICONS = {
 };
 
 const NAV = [
-  ['', 'פרויקטים', 'projects'],
+  ['', 'סקירה', 'dashboard'],
+  ['projects', 'פרויקטים', 'projects'],
   ['tasks', 'משימות וצוות', 'tasks'],
-  ['assistant', 'עוזר', 'assistant'],
-  ['dashboard', 'לוח בקרה', 'dashboard', true],
+  ['assistant', 'עוזר', 'assistant', true],
   ['risks', 'סיכונים', 'risks'],
   ['decisions', 'החלטות', 'decisions', true],
   ['changes', 'בקשות שינוי', 'changes', true],
@@ -789,11 +790,11 @@ export default function ProjectFlow() {
       <main className="pf-main">
         {heading && <h1 className="pf-page">{heading}</h1>}
         <Routes>
-          <Route index element={<ProjectList store={store} />} />
+          <Route index element={<Dashboard store={store} />} />
+          <Route path="projects" element={<ProjectList store={store} />} />
           <Route path="tasks" element={<Tasks store={store} />} />
           <Route path="assistant" element={<Assistant store={store} />} />
-          <Route path="dashboard" element={<Dashboard store={store} />} />
-          <Route path="risks" element={<Risks store={store} />} />
+                    <Route path="risks" element={<Risks store={store} />} />
           <Route path="decisions" element={<Decisions store={store} />} />
           <Route path="changes" element={<ChangeRequests store={store} />} />
           <Route path="payments" element={<Payments store={store} />} />

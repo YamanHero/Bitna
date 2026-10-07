@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { daysLeft } from './storage.js';
+import { dayDiff, milestones, rel } from './health.js';
 import {
   baseStatus, changeStatus, history, HOLD, log, resume, setSince, since, short, statusInfo,
   statusOf, STATUSES, stopwatch,
@@ -135,6 +136,52 @@ export default function StatusCard({ project, patch }) {
           ))}
         </ul>
       )}
+    </section>
+  );
+}
+
+// אבני דרך של הפרויקט: מועדי שלבים ויעד ההפעלה מופיעים אוטומטית; אפשר להוסיף אבני דרך משלכם.
+export function MilestonesCard({ project, patch }) {
+  const [title, setTitle] = useState('');
+  const [date, setDate] = useState('');
+  const list = milestones(project);
+  const today = new Date().toISOString().slice(0, 10);
+  const add = (e) => {
+    e.preventDefault();
+    if (!title.trim() || !date) return;
+    patch((p) => ({ ...p, milestones: [...(p.milestones || []), { id: `m_${Date.now().toString(36)}`, title: title.trim(), date, done: false }] }));
+    setTitle('');
+    setDate('');
+  };
+  const upd = (id, fn) => patch((p) => ({ ...p, milestones: (p.milestones || []).map((m) => (m.id === id ? fn(m) : m)) }));
+  return (
+    <section className="status-card ms-card" aria-label="אבני דרך">
+      <h3 className="ms-title">אבני דרך</h3>
+      {list.length === 0 && <p className="muted">מועדי השלבים ויעד ההפעלה יופיעו כאן אוטומטית. אפשר גם להוסיף אבן דרך משלכם.</p>}
+      <ul className="ms-list">
+        {list.map((m) => {
+          const d = dayDiff(m.date, today);
+          return (
+            <li key={m.id} className={m.done ? 'done' : d < 0 ? 'late' : ''}>
+              {m.kind === 'manual' ? (
+                <input type="checkbox" checked={!!m.done} onChange={() => upd(m.id, (x) => ({ ...x, done: !x.done }))} aria-label={`סימון ${m.title}`} />
+              ) : (
+                <span className="ms-auto" title="מתעדכן אוטומטית">{m.done ? '✓' : '•'}</span>
+              )}
+              <span className="ms-name">{m.title}</span>
+              <span className="ms-date">{new Date(`${m.date}T00:00:00`).toLocaleDateString('he-IL')}{!m.done && ` · ${rel(d)}`}</span>
+              {m.kind === 'manual' && (
+                <button type="button" className="danger icon-btn" aria-label={`הסרת ${m.title}`} onClick={() => patch((p) => ({ ...p, milestones: p.milestones.filter((x) => x.id !== m.id) }))}>✕</button>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+      <form className="row ms-form" onSubmit={add}>
+        <input type="text" placeholder="אבן דרך חדשה, למשל: פרסום המכרז" aria-label="שם אבן דרך" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <input type="date" aria-label="תאריך אבן דרך" value={date} onChange={(e) => setDate(e.target.value)} />
+        <button type="submit">הוספה</button>
+      </form>
     </section>
   );
 }

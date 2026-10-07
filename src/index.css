@@ -1683,3 +1683,50 @@ button.link{background:none;border:0;color:var(--accent,#2f6bff);padding:0;curso
 .pick small{opacity:.6;white-space:nowrap}
 .pick.custom{cursor:default}
 .pick.custom input[type=text],.pick.custom input:not([type]){flex:1;min-width:0}
+
+/* ---- סקירה ניהולית ---- */
+.ov-health{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.ov-pill{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;border-radius:14px;border:1px solid var(--line,#dde3ee);background:var(--card,#fff);min-height:64px;cursor:pointer;font:inherit;color:inherit}
+.ov-pill b{font-size:24px;line-height:1}
+.ov-pill span{font-size:12px;opacity:.8}
+.ov-pill.on{border-color:var(--accent,#2f6bff);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent,#2f6bff) 25%,transparent)}
+.ov-pill.lv-green b{color:#1f9d55}.ov-pill.lv-amber b{color:#c98a0b}.ov-pill.lv-red b{color:#d23b3b}
+.ov-attn{display:grid;gap:6px;margin-bottom:6px}
+.ov-attn .pf-h2{margin-bottom:2px}
+.ov-attn-row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:12px;text-decoration:none;color:inherit;border-inline-start:5px solid #c98a0b;background:color-mix(in srgb,#f5b73b 12%,var(--card,#fff))}
+.ov-attn-row.lv-red{border-inline-start-color:#d23b3b;background:color-mix(in srgb,#d23b3b 9%,var(--card,#fff))}
+.ov-attn-row span{opacity:.85;font-size:14px}
+.ov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.ov-card{background:var(--card,#fff);border:1px solid var(--line,#dde3ee);border-radius:16px;padding:14px;display:grid;gap:10px;border-inline-start:6px solid #1f9d55;min-width:0}
+.ov-card.lv-amber{border-inline-start-color:#c98a0b}.ov-card.lv-red{border-inline-start-color:#d23b3b}
+.ov-main{display:grid;gap:10px;text-decoration:none;color:inherit;min-width:0}
+.ov-head{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.ov-head h3{margin:0;font-size:18px}
+.lv{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.lv.lv-green{background:#1f9d5522;color:#177a43}.lv.lv-amber{background:#f5b73b33;color:#8a5d00}.lv.lv-red{background:#d23b3b22;color:#b02a2a}
+.ov-facts{margin:0;display:grid;gap:8px}
+.ov-facts dt{font-size:12px;opacity:.65}
+.ov-facts dd{margin:0;font-weight:600}
+.ov-facts small{font-weight:400;opacity:.8}
+.ov-facts small.bad,.ov-timeline .late .rel{color:#c0392b;opacity:1;font-weight:600}
+.ov-reasons{margin:0;padding:0;list-style:none;display:grid;gap:3px;font-size:13px}
+.ov-reasons .r-red{color:#b02a2a}.ov-reasons .r-amber{color:#8a5d00}
+.ov-adv{min-height:46px}
+.ov-timeline{list-style:none;margin:0 0 8px;padding:0;display:grid;gap:6px}
+.ov-timeline li{display:grid;grid-template-columns:70px 1fr auto;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--card,#fff);border:1px solid var(--line,#dde3ee)}
+.ov-timeline li.soon{border-color:#c98a0b}.ov-timeline li.late{border-color:#d23b3b}
+.ov-timeline time{font-weight:700}
+.ov-timeline a{text-decoration:none;color:inherit;display:grid;min-width:0}
+.ov-timeline small{opacity:.7}
+.ov-timeline .rel{font-size:12px;opacity:.8;white-space:nowrap}
+.ov-risk{display:block;margin-top:14px;padding:12px;border-radius:12px;background:color-mix(in srgb,#d23b3b 9%,var(--card,#fff));color:inherit;text-decoration:none}
+.ms-title{margin:0}
+.ms-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.ms-list li{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line,#dde3ee)}
+.ms-list li.done .ms-name{text-decoration:line-through;opacity:.6}
+.ms-list li.late .ms-date{color:#c0392b;font-weight:600}
+.ms-list input[type=checkbox]{width:22px;height:22px}
+.ms-auto{width:22px;text-align:center;opacity:.6}
+.ms-date{font-size:13px;opacity:.85}
+.ms-form{flex-wrap:wrap}.ms-form input[type=text]{flex:1 1 200px;min-width:0}
+@media(max-width:700px){.ov-grid{grid-template-columns:1fr}.ov-health{gap:6px}.ms-list li{grid-template-columns:auto 1fr auto}.ms-list .ms-date{grid-column:2/-1;grid-row:2}}

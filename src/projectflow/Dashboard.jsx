@@ -1,143 +1,186 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { currentStage, overallProgress, overdueStages, stageStatus, stagesOf } from './storage.js';
-import { RISKS_KEY, exposure, kindLabel, useList } from './registers.js';
+import { RISKS_KEY, exposure, useList } from './registers.js';
+import { LEVELS, LEVEL_LABEL, dayDiff, forecast, health, milestones, nextMilestone, rel } from './health.js';
+import { StatusChip, StatusRail } from './StatusCard.jsx';
+import { STATUSES, baseStatus, changeStatus, statusOf } from './status.js';
+import { daysLeft } from './storage.js';
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
-const addDays = (n) => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10);
+const fmt = (d) => new Date(`${d}T00:00:00`).toLocaleDateString('he-IL', { day: 'numeric', month: 'short' });
 
-// שלבי המכרז: מהכנת מסמכים ועד החלטה ואישור.
-const TENDER_IDS = ['tender_docs', 'publication', 'clarifications', 'bids', 'evaluation', 'approval'];
-
-function nextTask(project) {
-  const stage = currentStage(project);
-  if (!stage) return null;
-  const task = project.tasks.find((t) => t.stage === stage.id && !t.done);
-  return { stage, task };
-}
-
-function Stat({ n, label, tone }) {
+function Card({ p, h, onAdvance }) {
+  const idx = STATUSES.findIndex((x) => x.id === baseStatus(p));
+  const next = statusOf(p) !== 'hold' ? STATUSES[idx + 1] : null;
+  const nm = nextMilestone(p);
+  const left = daysLeft(p);
+  const f = forecast(p);
   return (
-    <div className={`stat${tone ? ` stat-${tone}` : ''}`}>
-      <b>{n}</b>
-      <span>{label}</span>
-    </div>
+    <article className={`ov-card lv-${h.level}`}>
+      <Link to={`/projectflow/${p.id}`} className="ov-main">
+        <div className="ov-head">
+          <h3>{p.name}</h3>
+          <span className={`lv lv-${h.level}`}>{LEVEL_LABEL[h.level]}</span>
+        </div>
+        <StatusChip project={p} />
+        <StatusRail project={p} />
+        <dl className="ov-facts">
+          <div>
+            <dt>אבן דרך הבאה</dt>
+            <dd>
+              {nm ? (
+                <>
+                  {nm.title}
+                  <small className={nm.date < todayStr() ? 'bad' : ''}> · {fmt(nm.date)} ({rel(dayDiff(nm.date))})</small>
+                </>
+              ) : (
+                <small>לא הוגדרה</small>
+              )}
+            </dd>
+          </div>
+          <div>
+            <dt>יעד הפעלה</dt>
+            <dd>
+              {p.targetDate ? (
+                <>
+                  {fmt(p.targetDate)}
+                  <small> · {left < 0 ? `עבר לפני ${-left} ימים` : `${left} ימים`}</small>
+                  {f && f.slip > 0 && left >= 0 && <small className="bad"> · צפי: +{f.slip} ימים</small>}
+                </>
+              ) : (
+                <small>לא הוגדר</small>
+              )}
+            </dd>
+          </div>
+        </dl>
+        {h.reasons.length > 0 && (
+          <ul className="ov-reasons">
+            {h.reasons.slice(0, 2).map((r) => (
+              <li key={r.text} className={`r-${r.level}`}>{r.text}</li>
+            ))}
+          </ul>
+        )}
+      </Link>
+      {next && next.id !== 'closed' && (
+        <button type="button" className="ghost ov-adv" onClick={() => onAdvance(p, next)}>
+          קידום ל"{next.label}"
+        </button>
+      )}
+    </article>
   );
 }
 
 export default function Dashboard({ store }) {
   const risks = useList(RISKS_KEY).items;
+  const [filter, setFilter] = useState('all');
+  const [undo, setUndo] = useState(null);
+  const [more, setMore] = useState(false);
   const today = todayStr();
 
-  const active = store.projects.filter((p) => overallProgress(p) < 100);
-  const inTender = active.filter((p) => TENDER_IDS.includes(currentStage(p)?.id));
-  const notStarted = active.filter((p) => overallProgress(p) === 0);
-  const openRisks = risks.filter((r) => r.status === 'open');
-  const highRisks = openRisks.filter((r) => exposure(r) >= 6);
-  const blockers = openRisks.filter((r) => r.kind === 'blocker');
-  const late = active.flatMap((p) => overdueStages(p, today).map((s) => ({ p, s })));
-  const weekEnd = addDays(7);
-  const soon = active
-    .flatMap((p) =>
-      stagesOf(p).filter((s) => {
-        const due = p.stageMeta?.[s.id]?.due;
-        return due && due >= today && due <= weekEnd && !stageStatus(p, s.id).complete;
-      }).map((s) => ({ p, s, due: p.stageMeta[s.id].due }))
-    )
-    .sort((a, b) => a.due.localeCompare(b.due));
-  const projectName = (id) => store.projects.find((p) => p.id === id)?.name;
+  const open = risks.filter((r) => r.status === 'open');
+  const blockersOf = (id) => open.filter((r) => r.kind === 'blocker' && r.projectId === id).length;
+  const rows = store.projects
+    .map((p) => ({ p, h: health(p, blockersOf(p.id)) }))
+    .sort((a, b) => LEVELS[b.h.level] - LEVELS[a.h.level] || (a.p.targetDate || '9').localeCompare(b.p.targetDate || '9'));
+  const live = rows.filter((r) => r.h.level !== 'done');
+  const count = (lv) => live.filter((r) => r.h.level === lv).length;
+  const shown = live.filter((r) => filter === 'all' || r.h.level === filter);
+  const attention = live.filter((r) => r.h.level !== 'green').slice(0, 3);
+  const highRisks = open.filter((r) => exposure(r) >= 6).length;
+
+  const ms = store.projects
+    .filter((p) => statusOf(p) !== 'closed')
+    .flatMap((p) => milestones(p).filter((m) => !m.done && dayDiff(m.date, today) <= 60).map((m) => ({ ...m, p })))
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const msShown = more ? ms : ms.slice(0, 6);
+
+  const advance = (p, next) => {
+    const before = p;
+    store.update(p.id, (x) => changeStatus(x, next.id));
+    setUndo({ before, label: `${p.name}: ${next.label}` });
+    clearTimeout(advance.t);
+    advance.t = setTimeout(() => setUndo(null), 7000);
+  };
+  const revert = () => {
+    store.update(undo.before.id, () => undo.before);
+    setUndo(null);
+  };
+
+  if (store.projects.length === 0) {
+    return (
+      <p className="pf-empty">
+        אין פרויקטים עדיין. <Link to="/projectflow/projects">פתחו פרויקט ראשון</Link> והסקירה תתמלא מעצמה.
+      </p>
+    );
+  }
 
   return (
     <>
-      <div className="stats">
-        <Stat n={active.length} label="פרויקטים פעילים" />
-        <Stat n={notStarted.length} label="עוד לא התחילו" />
-        <Stat n={inTender.length} label="בשלבי מכרז" />
-        <Stat n={late.length} label="שלבים באיחור" tone={late.length ? 'bad' : ''} />
-        <Stat n={highRisks.length} label="סיכונים בחשיפה גבוהה" tone={highRisks.length ? 'bad' : ''} />
-        <Stat n={blockers.length} label="חסמים פתוחים" tone={blockers.length ? 'bad' : ''} />
+      <div className="ov-health" role="group" aria-label="סינון לפי מצב">
+        {[['all', 'כל הפעילים', live.length], ['green', 'תקין', count('green')], ['amber', 'דורש מעקב', count('amber')], ['red', 'חריג', count('red')]].map(([id, label, n]) => (
+          <button key={id} type="button" className={`ov-pill lv-${id}${filter === id ? ' on' : ''}`} onClick={() => setFilter(id)}>
+            <b>{n}</b>
+            <span>{label}</span>
+          </button>
+        ))}
       </div>
 
-      {(late.length > 0 || soon.length > 0) && (
-        <>
-          <h2 className="pf-h2">מועדים</h2>
-          <div className="pf-list">
-            {late.map(({ p, s }) => (
-              <Link key={`${p.id}-${s.id}`} to={`/projectflow/${p.id}`} className="pf-line late">
-                <strong>{p.name}</strong>
-                <span>{s.title}</span>
-                <span className="badge high">באיחור, יעד {p.stageMeta[s.id].due}</span>
-              </Link>
-            ))}
-            {soon.map(({ p, s, due }) => (
-              <Link key={`${p.id}-${s.id}-soon`} to={`/projectflow/${p.id}`} className="pf-line">
-                <strong>{p.name}</strong>
-                <span>{s.title}</span>
-                <span className="badge mid">השבוע, יעד {due}</span>
-              </Link>
-            ))}
-          </div>
-        </>
+      {attention.length > 0 && filter === 'all' && (
+        <section className="ov-attn" aria-label="דורש תשומת לב">
+          <h2 className="pf-h2">דורש תשומת לב עכשיו</h2>
+          {attention.map(({ p, h }) => (
+            <Link key={p.id} to={`/projectflow/${p.id}`} className={`ov-attn-row lv-${h.level}`}>
+              <strong>{p.name}</strong>
+              <span>{h.reasons[0]?.text}</span>
+            </Link>
+          ))}
+        </section>
       )}
 
-      <h2 className="pf-h2">הפעולה הבאה בכל פרויקט</h2>
-      {active.length === 0 ? (
-        <p className="pf-empty">אין פרויקטים פעילים. פתחו פרויקט בלשונית פרויקטים.</p>
+      <h2 className="pf-h2">הפרויקטים שלי</h2>
+      <div className="ov-grid">
+        {shown.map(({ p, h }) => (
+          <Card key={p.id} p={p} h={h} onAdvance={advance} />
+        ))}
+        {shown.length === 0 && <p className="muted">אין פרויקטים במצב הזה.</p>}
+      </div>
+
+      <h2 className="pf-h2">אבני דרך קרובות</h2>
+      {ms.length === 0 ? (
+        <p className="muted">אין אבני דרך ב-60 הימים הקרובים. הוסיפו מועדי שלבים או אבני דרך במסך הפרויקט.</p>
       ) : (
-        <div className="pf-list">
-          {active.map((p) => {
-            const next = nextTask(p);
-            const lateCount = overdueStages(p, today).length;
-            const projectBlockers = blockers.filter((r) => r.projectId === p.id);
+        <ol className="ov-timeline">
+          {msShown.map((m) => {
+            const d = dayDiff(m.date, today);
             return (
-              <Link key={p.id} to={`/projectflow/${p.id}`} className="card pf-item pf-link">
-                <div className="pf-item-head">
-                  <strong>{p.name}</strong>
-                  <span className="muted">{overallProgress(p)}%</span>
-                </div>
-                {next && (
-                  <div>
-                    <span className="muted">שלב: {next.stage.title}</span>
-                    {next.task && (
-                      <div>
-                        <span className="muted">הבא: </span>
-                        {next.task.title}
-                      </div>
-                    )}
-                  </div>
-                )}
-                {(lateCount > 0 || projectBlockers.length > 0) && (
-                  <div className="pf-meta">
-                    {lateCount > 0 && <span className="warn">{lateCount} שלבים באיחור</span>}
-                    {projectBlockers.length > 0 && (
-                      <span className="warn">{projectBlockers.length} חסמים פתוחים</span>
-                    )}
-                  </div>
-                )}
-              </Link>
+              <li key={`${m.p.id}-${m.id}`} className={d < 0 ? 'late' : d <= 7 ? 'soon' : ''}>
+                <time>{fmt(m.date)}</time>
+                <Link to={`/projectflow/${m.p.id}`}>
+                  <strong>{m.title}</strong>
+                  <small>{m.p.name}</small>
+                </Link>
+                <span className="rel">{rel(d)}</span>
+              </li>
             );
           })}
-        </div>
+        </ol>
+      )}
+      {ms.length > 6 && (
+        <button type="button" className="link" onClick={() => setMore((v) => !v)}>
+          {more ? 'הצגת פחות' : `הצגת כל ${ms.length} אבני הדרך`}
+        </button>
       )}
 
-      <h2 className="pf-h2">חסמים וסיכונים בחשיפה גבוהה</h2>
-      {[...blockers, ...highRisks.filter((r) => r.kind !== 'blocker')].length === 0 ? (
-        <p className="muted">אין כרגע חסמים או סיכונים גבוהים פתוחים.</p>
-      ) : (
-        <div className="pf-list">
-          {[...blockers, ...highRisks.filter((r) => r.kind !== 'blocker')].map((r) => (
-            <div key={r.id} className="card pf-item">
-              <div className="pf-item-head">
-                <strong>{r.title}</strong>
-                <span className="kind">{kindLabel(r.kind)}</span>
-              </div>
-              <div className="pf-meta">
-                {projectName(r.projectId) && <span>{projectName(r.projectId)}</span>}
-                {r.owner && <span>אחראי: {r.owner}</span>}
-                {r.due && <span>יעד: {r.due}</span>}
-              </div>
-              {r.mitigation && <p className="pf-note">טיפול: {r.mitigation}</p>}
-            </div>
-          ))}
+      {highRisks > 0 && (
+        <Link to="/projectflow/risks" className="ov-risk">
+          {highRisks} סיכונים בחשיפה גבוהה פתוחים · לצפייה במרשם הסיכונים
+        </Link>
+      )}
+
+      {undo && (
+        <div className="toast" role="status">
+          <span>עודכן: {undo.label}</span>
+          <button type="button" className="ghost sm" onClick={revert}>ביטול</button>
         </div>
       )}
     </>
