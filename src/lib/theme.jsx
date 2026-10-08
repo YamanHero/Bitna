@@ -3,7 +3,8 @@ import { useState } from 'react';
 const KEY = 'pfui.theme';
 
 export const THEMES = [
-  { id: 'blue', label: 'אורורה', color: '#5b5bf0', grad: 'linear-gradient(135deg,#5b5bf0,#8b5cf6 50%,#06b6d4)' },
+  { id: 'blue', label: 'אלמוג', color: '#e8453c', grad: 'linear-gradient(135deg,#e8453c,#f4623a 50%,#f59e0b)' },
+  { id: 'aurora', label: 'אורורה', color: '#5b5bf0', grad: 'linear-gradient(135deg,#5b5bf0,#8b5cf6 50%,#06b6d4)' },
   { id: 'sunset', label: 'שקיעה', color: '#e11d74', grad: 'linear-gradient(135deg,#e11d74,#f97316)' },
   { id: 'teal', label: 'אוקיינוס', color: '#0d9488', grad: 'linear-gradient(135deg,#0ea5e9,#0d9488 55%,#22c55e)' },
   { id: 'violet', label: 'סגול', color: '#7c3aed', grad: 'linear-gradient(135deg,#7c3aed,#d946ef)' },

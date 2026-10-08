@@ -1776,29 +1776,38 @@ button.link{background:none;border:0;color:var(--accent,#2f6bff);padding:0;curso
    עיצוב חדשני: צבעי גרדיאנט, תנועה ואייקוני גופן
    ===================================================================== */
 :root {
-  --bg: #f0f1fb;
-  --accent: #5b5bf0;
-  --accent-ink: #4338ca;
-  --accent-soft: #ebe9ff;
+  --bg: #fbf6f1;
+  --surface: #ffffff;
+  --surface-2: #f7efe7;
+  --ink: #2a1f2d;
+  --muted: #7a6a70;
+  --line: #eadbcf;
+  --accent: #e8453c;
+  --accent-ink: #b92f28;
+  --accent-soft: #ffe7e3;
+  --accent2: #f59e0b;
+  --card: var(--surface);
   --on-accent: #fff;
-  --side: #0d0f2e;
-  --side-2: #25207a;
-  --ph-prep: #5b5bf0;
+  --side: #1f1626;
+  --side-2: #4a2a45;
+  --ph-prep: #3b82f6;
   --ph-tender: #a855f7;
   --ph-select: #f59e0b;
-  --ph-deliver: #06b6d4;
-  --ph-close: #10b981;
-  --grad: linear-gradient(135deg, #5b5bf0 0%, #8b5cf6 50%, #06b6d4 100%);
+  --ph-deliver: #14b8a6;
+  --ph-close: #22c55e;
+  --grad: linear-gradient(135deg, #e8453c 0%, #f4623a 50%, #f59e0b 100%);
   --glow: 0 10px 28px -8px color-mix(in srgb, var(--accent) 55%, transparent);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
-:root[data-theme='sunset'] { --accent: #e11d74; --accent-ink: #be125f; --accent-soft: #ffe4f0; --side: #2a0a1c; --side-2: #7a1b45; --grad: linear-gradient(135deg, #e11d74, #f97316); }
-:root[data-theme='teal'] { --accent: #0d9488; --accent-ink: #0a6c64; --accent-soft: #d9f6f2; --side: #062a33; --side-2: #0b5563; --grad: linear-gradient(135deg, #0ea5e9, #0d9488 55%, #22c55e); }
-:root[data-theme='violet'] { --accent: #7c3aed; --accent-ink: #5b21b6; --accent-soft: #f0e7ff; --side: #1a0f3a; --side-2: #4c1d95; --grad: linear-gradient(135deg, #7c3aed, #d946ef); }
-:root[data-theme='green'] { --accent: #16a34a; --accent-ink: #11782f; --accent-soft: #dcf7e5; --side: #07261a; --side-2: #14532d; --grad: linear-gradient(135deg, #16a34a, #84cc16); }
-:root[data-theme='amber'] { --accent: #ea580c; --accent-ink: #b8430a; --accent-soft: #ffe8d6; --side: #2b1208; --side-2: #7c2d12; --grad: linear-gradient(135deg, #ea580c, #facc15); }
+:root[data-theme='aurora'] { --bg: #f0f1fb; --surface-2: #f6f8fc; --ink: #131a2b; --muted: #5d6882; --line: #e1e6f0; --accent: #5b5bf0; --accent-ink: #4338ca; --accent-soft: #ebe9ff; --accent2: #06b6d4; --side: #0d0f2e; --side-2: #25207a; --grad: linear-gradient(135deg, #5b5bf0 0%, #8b5cf6 50%, #06b6d4 100%); }
+:root[data-theme='sunset'] { --accent2: #f97316; --accent: #e11d74; --accent-ink: #be125f; --accent-soft: #ffe4f0; --side: #2a0a1c; --side-2: #7a1b45; --grad: linear-gradient(135deg, #e11d74, #f97316); }
+:root[data-theme='teal'] { --accent2: #22c55e; --accent: #0d9488; --accent-ink: #0a6c64; --accent-soft: #d9f6f2; --side: #062a33; --side-2: #0b5563; --grad: linear-gradient(135deg, #0ea5e9, #0d9488 55%, #22c55e); }
+:root[data-theme='violet'] { --accent2: #d946ef; --accent: #7c3aed; --accent-ink: #5b21b6; --accent-soft: #f0e7ff; --side: #1a0f3a; --side-2: #4c1d95; --grad: linear-gradient(135deg, #7c3aed, #d946ef); }
+:root[data-theme='green'] { --accent2: #84cc16; --accent: #16a34a; --accent-ink: #11782f; --accent-soft: #dcf7e5; --side: #07261a; --side-2: #14532d; --grad: linear-gradient(135deg, #16a34a, #84cc16); }
+:root[data-theme='amber'] { --accent2: #facc15; --accent: #ea580c; --accent-ink: #b8430a; --accent-soft: #ffe8d6; --side: #2b1208; --side-2: #7c2d12; --grad: linear-gradient(135deg, #ea580c, #facc15); }
 @media (prefers-color-scheme: dark) {
-  :root { --bg: #080a1c; --surface: #12152c; --surface-2: #0e1124; --line: #262b52; --accent: #8c8cff; --accent-ink: #c4c4ff; --accent-soft: #24245a; --on-accent: #fff; --side: #070817; --side-2: #1d1a58; }
+  :root { --bg: #151019; --surface: #1f1827; --surface-2: #1a1421; --ink: #f4ecf1; --muted: #b9a8b2; --line: #3a2d3f; --accent: #ff7a6b; --accent-ink: #ffc2b9; --accent-soft: #4a2227; --accent2: #ffc247; --on-accent: #fff; --side: #0f0a14; --side-2: #3a1f3a; }
+  :root[data-theme='aurora'] { --bg: #080a1c; --surface: #12152c; --surface-2: #0e1124; --ink: #e8edf8; --muted: #97a4c2; --line: #262b52; --accent: #8c8cff; --accent-ink: #c4c4ff; --accent-soft: #24245a; --accent2: #22d3ee; --side: #070817; --side-2: #1d1a58; }
   :root[data-theme='sunset'] { --accent: #ff6aa8; --accent-ink: #ffc2dc; --accent-soft: #4a1630; --side: #14060e; --side-2: #5a1535; }
   :root[data-theme='teal'] { --accent: #35d3c4; --accent-ink: #a7f0e8; --accent-soft: #0f3a3f; --side: #041a20; --side-2: #08424e; }
   :root[data-theme='violet'] { --accent: #b794ff; --accent-ink: #dccbff; --accent-soft: #2d2060; --side: #0e0822; --side-2: #3b1a78; }
@@ -1809,7 +1818,7 @@ button.link{background:none;border:0;color:var(--accent,#2f6bff);padding:0;curso
 body {
   background:
     radial-gradient(900px 520px at 88% -8%, color-mix(in srgb, var(--accent) 17%, transparent), transparent 62%),
-    radial-gradient(700px 420px at 4% 6%, color-mix(in srgb, #06b6d4 11%, transparent), transparent 62%),
+    radial-gradient(700px 420px at 4% 6%, color-mix(in srgb, var(--accent2) 13%, transparent), transparent 62%),
     var(--bg);
   background-attachment: fixed;
 }
@@ -1867,7 +1876,7 @@ button i, a i { margin-inline-end: 6px; }
 /* פס סטטוס: מילוי גרדיאנט, והשלב הנוכחי "זורם" */
 .rail-step.done { background: var(--grad); }
 .rail-step.current {
-  background: linear-gradient(90deg, var(--accent), #06b6d4, var(--accent));
+  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent));
   background-size: 200% 100%;
   animation: flow 1.8s linear infinite;
   box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 60%, transparent);

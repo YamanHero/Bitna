@@ -5,8 +5,8 @@
   "dir": "rtl",
   "start_url": "/projectflow",
   "display": "standalone",
-  "background_color": "#111a33",
-  "theme_color": "#111a33",
+  "background_color": "#1f1626",
+  "theme_color": "#1f1626",
   "icons": [
     {
       "src": "/favicon.svg",
