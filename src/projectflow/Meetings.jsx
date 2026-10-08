@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { DECISIONS_KEY, MEETINGS_KEY, TEAM_KEY, useList } from './registers.js';
+import { DECISIONS_KEY, MEETINGS_KEY, TEAM_KEY, TOPICS_KEY, useList } from './registers.js';
 import { deleteAudio, extract, getAudio, parseDue, saveAudio, summaryText } from './meetings.js';
 import { currentStage, stagesOf, uid } from './storage.js';
 
@@ -148,10 +148,47 @@ function Recorder({ meeting, onPatch }) {
 }
 
 
+
+// נושא הפגישה: בחירה מרשימה (ישיבת צוות, ישיבת סטטוס…) עם אפשרות להוסיף ולהסיר נושאים.
+function TopicPicker({ value, onPick }) {
+  const topics = useList(TOPICS_KEY);
+  const [manage, setManage] = useState(false);
+  const [text, setText] = useState('');
+  const add = (e) => {
+    e.preventDefault();
+    const name = text.trim();
+    if (!name) return;
+    if (!topics.items.some((t) => t.name === name)) topics.add({ name });
+    onPick(name);
+    setText('');
+  };
+  const list = [...topics.items.filter((t) => String(t.id).startsWith('seedtopic_')), ...topics.items.filter((t) => !String(t.id).startsWith('seedtopic_')).reverse()];
+  return (
+    <div className="topics">
+      <div className="att-head">
+        <div className="mt-lab">סוג הפגישה</div>
+        <button type="button" className="link" onClick={() => setManage((v) => !v)}>{manage ? 'סיום עריכה' : 'עריכת הרשימה'}</button>
+      </div>
+      <div className="chips">
+        {list.map((t) => (
+          <span key={t.id} className="topic-wrap">
+            <button type="button" className={`chip${value === t.name ? ' on' : ''}`} aria-pressed={value === t.name} onClick={() => onPick(t.name)}>{t.name}</button>
+            {manage && <button type="button" className="danger icon-btn" aria-label={`הסרת ${t.name}`} onClick={() => topics.remove(t.id)}>✕</button>}
+          </span>
+        ))}
+      </div>
+      <form className="row" onSubmit={add}>
+        <input value={text} onChange={(e) => setText(e.target.value)} placeholder="נושא חדש לרשימה, למשל: ועדת היגוי" aria-label="נושא חדש לרשימה" />
+        <button type="submit">הוספה</button>
+      </form>
+    </div>
+  );
+}
+
 // בחירת משתתפים: מקובצים לפי גוף/יחידה, עם חיפוש והוספת איש חדש לרשימה.
 function Attendees({ meeting, team, onChange }) {
   const [q, setQ] = useState('');
-  const [form, setForm] = useState({ name: '', org: '', kind: 'internal' });
+  const [form, setForm] = useState({ name: '', role: '', org: '', kind: 'internal' });
   const [adding, setAdding] = useState(false);
   const orgs = [...new Set(team.items.map((m) => m.org).filter(Boolean))];
   const on = (n) => meeting.attendees.includes(n);
@@ -165,9 +202,9 @@ function Attendees({ meeting, team, onChange }) {
     e.preventDefault();
     const name = form.name.trim();
     if (!name) return;
-    if (!team.items.some((m) => m.name === name)) team.add({ name, org: form.org.trim(), kind: form.kind, role: '', contact: '' });
+    if (!team.items.some((m) => m.name === name)) team.add({ name, org: form.org.trim(), kind: form.kind, role: form.role.trim(), contact: '' });
     if (!on(name)) onChange([...meeting.attendees, name]);
-    setForm({ name: '', org: form.org, kind: form.kind });
+    setForm({ name: '', role: '', org: form.org, kind: form.kind });
   };
   return (
     <div className="att">
@@ -183,7 +220,7 @@ function Attendees({ meeting, team, onChange }) {
           </button>
           <div className="chips">
             {g.people.map((p) => (
-              <button key={p.id} type="button" className={`chip${on(p.name) ? ' on' : ''}`} aria-pressed={on(p.name)} onClick={() => toggle(p.name)}>{p.name}</button>
+              <button key={p.id} type="button" className={`chip${on(p.name) ? ' on' : ''}`} aria-pressed={on(p.name)} onClick={() => toggle(p.name)} title={p.role || undefined}>{p.name}{p.role && <small className="chip-role">{p.role}</small>}</button>
             ))}
           </div>
         </div>
@@ -192,6 +229,7 @@ function Attendees({ meeting, team, onChange }) {
       {adding && (
         <form className="att-add" onSubmit={add}>
           <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="שם מלא" aria-label="שם איש חדש" required />
+          <input value={form.role} onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))} placeholder="תפקיד (למשל: מנהל פרויקט)" aria-label="תפקיד" />
           <input value={form.org} onChange={(e) => setForm((f) => ({ ...f, org: e.target.value }))} list="pf-orgs-m" placeholder="גוף או יחידה (למשל: שם הספק)" aria-label="גוף או יחידה" />
           <datalist id="pf-orgs-m">{orgs.map((o) => <option key={o} value={o} />)}</datalist>
           <select value={form.kind} onChange={(e) => setForm((f) => ({ ...f, kind: e.target.value }))} aria-label="שייכות">
@@ -216,7 +254,7 @@ function Editor({ meeting, store, list }) {
   const patch = (p) => list.update(meeting.id, p);
   const project = store.projects.find((p) => p.id === meeting.projectId);
   const ownerName = (id) => team.find((m) => m.id === id)?.name || '';
-  const labelOf = (n) => { const p = team.find((x) => x.name === n); return p?.org ? `${n} (${p.org})` : n; };
+  const labelOf = (n) => { const p = team.find((x) => x.name === n); const d = [p?.role, p?.org].filter(Boolean).join(', '); return d ? `${n} (${d})` : n; };
   const setAction = (id, p) => patch({ actions: meeting.actions.map((a) => (a.id === id ? { ...a, ...p } : a)) });
 
   const insert = (prefix) => patch({ notes: `${meeting.notes}${meeting.notes && !meeting.notes.endsWith('\n') ? '\n' : ''}${prefix}: ` });
@@ -272,9 +310,10 @@ function Editor({ meeting, store, list }) {
     <>
       <Link to="/projectflow/meetings">חזרה לכל הפגישות</Link>
       <section className="status-card mt-form">
+        <TopicPicker value={meeting.title} onPick={(t) => patch({ title: t })} />
         <label>
           נושא הפגישה
-          <input value={meeting.title} onChange={(e) => patch({ title: e.target.value })} placeholder="למשל: ישיבת מעקב עם הספק" />
+          <input value={meeting.title} onChange={(e) => patch({ title: e.target.value })} placeholder="אפשר לבחור למעלה או לכתוב נושא חופשי" />
         </label>
         <div className="mt-two">
           <label>

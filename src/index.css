@@ -1769,3 +1769,5 @@ button.link{background:none;border:0;color:var(--accent,#2f6bff);padding:0;curso
 .att-org small{font-weight:400;color:var(--accent,#2f6bff)}
 .att-add{display:grid;gap:8px;padding:10px;border-radius:12px;background:color-mix(in srgb,var(--accent,#2f6bff) 6%,transparent)}
 .chip[aria-pressed=true]::before{content:'✓ '}
+.topic-wrap{display:inline-flex;align-items:center;gap:4px}
+.chip-role{display:block;font-size:11px;opacity:.7;font-weight:400}

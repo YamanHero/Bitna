@@ -20,6 +20,7 @@ export const COLLECTIONS = [
   { key: 'projectflow.payments.v1', kind: 'payment' },
   { key: 'projectflow.team.v1', kind: 'member' },
   { key: 'projectflow.meetings.v1', kind: 'meeting' },
+  { key: 'projectflow.topics.v1', kind: 'topic' },
 ];
 
 export class CloudError extends Error {

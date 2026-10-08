@@ -143,7 +143,24 @@ const SEED = [
   ['דורון ריינדליך', NESS], ['נחמה פנט', NESS], ['שוקי ברטי', NESS],
 ];
 
+const TOPICS = ['ישיבת צוות', 'ישיבת סטטוס', 'פגישת ספק', 'פגישת תיאום', 'סקירת ניהול'];
+export function seedTopics() {
+  try {
+    if (localStorage.getItem('pfui.topicsSeeded') === '1') return;
+    const KEY = 'projectflow.topics.v1';
+    const cur = JSON.parse(localStorage.getItem(KEY) || '[]');
+    const have = new Set(cur.map((t) => t.name));
+    const add = TOPICS.filter((n) => !have.has(n)).map((name, i) => ({ id: `seedtopic_${i}`, createdAt: new Date().toISOString(), name }));
+    if (add.length) {
+      localStorage.setItem(KEY, JSON.stringify([...cur, ...add]));
+      window.dispatchEvent(new Event('pf:data'));
+    }
+    localStorage.setItem('pfui.topicsSeeded', '1');
+  } catch { /* ignore */ }
+}
+
 export function seedContacts() {
+  seedTopics();
   try {
     if (localStorage.getItem('pfui.contactsSeeded') === '1') return;
     const KEY = 'projectflow.team.v1';
