@@ -132,3 +132,36 @@ export function summaryText(m, ownerName = () => '') {
   }
   return out.join('\n\n');
 }
+
+// ---------- אנשי קשר ראשוניים (נטענים פעם אחת, ניתנים לעריכה) ----------
+const TECH = 'אגף טכנולוגיה';
+const ELECTIONS = 'מינהל הבחירות';
+const NESS = 'נס';
+const SEED = [
+  ['שאול שאת', TECH], ['ערן כרמון', TECH], ['יוסף חי אליצור', TECH], ['ליאור מקסימוס', TECH], ['ליאור ספיר', TECH],
+  ['מאיה שרון כהן', ELECTIONS], ['ריאן גאנם', ELECTIONS], ['אתי אברג', ELECTIONS], ['מוראן חלבי', ELECTIONS], ['עדי כהן', ELECTIONS],
+  ['דורון ריינדליך', NESS], ['נחמה פנט', NESS], ['שוקי ברטי', NESS],
+];
+
+export function seedContacts() {
+  try {
+    if (localStorage.getItem('pfui.contactsSeeded') === '1') return;
+    const KEY = 'projectflow.team.v1';
+    const cur = JSON.parse(localStorage.getItem(KEY) || '[]');
+    const have = new Set(cur.map((m) => m.name));
+    const add = SEED.filter(([n]) => !have.has(n)).map(([name, org], i) => ({
+      id: `seed_${i}_${name.replace(/\s+/g, '_')}`,
+      createdAt: new Date().toISOString(),
+      name,
+      org,
+      role: '',
+      kind: org === NESS ? 'vendor' : 'internal',
+      contact: '',
+    }));
+    if (add.length) {
+      localStorage.setItem(KEY, JSON.stringify([...cur, ...add]));
+      window.dispatchEvent(new Event('pf:data'));
+    }
+    localStorage.setItem('pfui.contactsSeeded', '1');
+  } catch { /* ignore */ }
+}

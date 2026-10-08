@@ -127,7 +127,7 @@ function TaskBoard({ store, team }) {
   );
 }
 
-const EMPTY = { name: '', role: '', kind: 'internal', contact: '' };
+const EMPTY = { name: '', org: '', role: '', kind: 'internal', contact: '' };
 
 function Team({ store, team }) {
   const [form, setForm] = useState(EMPTY);
@@ -138,7 +138,7 @@ function Team({ store, team }) {
   const submit = (e) => {
     e.preventDefault();
     if (!form.name.trim()) return;
-    const data = { ...form, name: form.name.trim(), role: form.role.trim(), contact: form.contact.trim() };
+    const data = { ...form, name: form.name.trim(), org: form.org.trim(), role: form.role.trim(), contact: form.contact.trim() };
     if (editId) team.update(editId, data);
     else team.add(data);
     setForm(EMPTY);
@@ -146,7 +146,7 @@ function Team({ store, team }) {
   };
   const edit = (m) => {
     setEditId(m.id);
-    setForm({ name: m.name, role: m.role || '', kind: m.kind || 'internal', contact: m.contact || '' });
+    setForm({ name: m.name, org: m.org || '', role: m.role || '', kind: m.kind || 'internal', contact: m.contact || '' });
   };
   const remove = (m) => {
     if (!window.confirm(`להסיר את ${m.name}? המשימות ששויכו אליו יישארו בלי אחראי.`)) return;
@@ -172,6 +172,13 @@ function Team({ store, team }) {
         <label>
           שם
           <input value={form.name} onChange={set('name')} required />
+        </label>
+        <label>
+          גוף או יחידה
+          <input value={form.org} onChange={set('org')} list="pf-orgs" placeholder="למשל: אגף טכנולוגיה, או שם הספק" />
+          <datalist id="pf-orgs">
+            {[...new Set(team.items.map((m) => m.org).filter(Boolean))].map((o) => <option key={o} value={o} />)}
+          </datalist>
         </label>
         <label>
           תפקיד
@@ -215,6 +222,7 @@ function Team({ store, team }) {
                   </span>
                 </div>
                 <div className="pf-meta">
+                  {m.org && <span>{m.org}</span>}
                   <span>{ROLES.find((r) => r.value === m.kind)?.label || 'פנימי'}</span>
                   {m.role && <span>{m.role}</span>}
                   {m.contact && <span dir="ltr">{m.contact}</span>}

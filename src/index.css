@@ -1760,3 +1760,12 @@ button.link{background:none;border:0;color:var(--accent,#2f6bff);padding:0;curso
 .mt-foot{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 20px}
 .mt-foot button{flex:1 1 auto;min-height:46px}
 @media(max-width:700px){.mt-two{grid-template-columns:1fr}.rec-time{font-size:30px}}
+
+/* ---- בחירת משתתפים ---- */
+.att{display:grid;gap:10px}
+.att-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.att-group{display:grid;gap:6px}
+.att-org{display:flex;justify-content:space-between;align-items:center;background:none;border:0;border-bottom:1px solid var(--line,#dde3ee);padding:6px 0;font:inherit;font-weight:700;font-size:13px;color:inherit;cursor:pointer;min-height:36px}
+.att-org small{font-weight:400;color:var(--accent,#2f6bff)}
+.att-add{display:grid;gap:8px;padding:10px;border-radius:12px;background:color-mix(in srgb,var(--accent,#2f6bff) 6%,transparent)}
+.chip[aria-pressed=true]::before{content:'✓ '}

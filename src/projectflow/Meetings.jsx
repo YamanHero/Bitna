@@ -147,31 +147,82 @@ function Recorder({ meeting, onPatch }) {
   );
 }
 
+
+// בחירת משתתפים: מקובצים לפי גוף/יחידה, עם חיפוש והוספת איש חדש לרשימה.
+function Attendees({ meeting, team, onChange }) {
+  const [q, setQ] = useState('');
+  const [form, setForm] = useState({ name: '', org: '', kind: 'internal' });
+  const [adding, setAdding] = useState(false);
+  const orgs = [...new Set(team.items.map((m) => m.org).filter(Boolean))];
+  const on = (n) => meeting.attendees.includes(n);
+  const toggle = (n) => onChange(on(n) ? meeting.attendees.filter((x) => x !== n) : [...meeting.attendees, n]);
+  const matches = (m) => !q.trim() || `${m.name} ${m.org || ''}`.includes(q.trim());
+  const groups = [...orgs, ''].map((o) => ({ org: o, people: team.items.filter((m) => (m.org || '') === o && matches(m)) })).filter((g) => g.people.length);
+  const allOn = (g) => g.people.every((p) => on(p.name));
+  const toggleGroup = (g) =>
+    onChange(allOn(g) ? meeting.attendees.filter((n) => !g.people.some((p) => p.name === n)) : [...new Set([...meeting.attendees, ...g.people.map((p) => p.name)])]);
+  const add = (e) => {
+    e.preventDefault();
+    const name = form.name.trim();
+    if (!name) return;
+    if (!team.items.some((m) => m.name === name)) team.add({ name, org: form.org.trim(), kind: form.kind, role: '', contact: '' });
+    if (!on(name)) onChange([...meeting.attendees, name]);
+    setForm({ name: '', org: form.org, kind: form.kind });
+  };
+  return (
+    <div className="att">
+      <div className="att-head">
+        <div className="mt-lab">משתתפים {meeting.attendees.length > 0 && <span className="badge">{meeting.attendees.length} נבחרו</span>}</div>
+        <button type="button" className="link" onClick={() => setAdding((v) => !v)}>{adding ? 'סגירה' : '+ הוספת איש חדש'}</button>
+      </div>
+      {team.items.length > 8 && <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="חיפוש שם או יחידה" aria-label="חיפוש משתתף" />}
+      {groups.map((g) => (
+        <div key={g.org || '_'} className="att-group">
+          <button type="button" className="att-org" onClick={() => toggleGroup(g)} aria-label={`בחירת כל ${g.org || 'ללא שיוך'}`}>
+            {g.org || 'ללא שיוך'} <small>{allOn(g) ? 'ביטול הכל' : 'בחירת הכל'}</small>
+          </button>
+          <div className="chips">
+            {g.people.map((p) => (
+              <button key={p.id} type="button" className={`chip${on(p.name) ? ' on' : ''}`} aria-pressed={on(p.name)} onClick={() => toggle(p.name)}>{p.name}</button>
+            ))}
+          </div>
+        </div>
+      ))}
+      {team.items.length === 0 && <p className="muted">אין אנשים ברשימה. הוסיפו את הראשון.</p>}
+      {adding && (
+        <form className="att-add" onSubmit={add}>
+          <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="שם מלא" aria-label="שם איש חדש" required />
+          <input value={form.org} onChange={(e) => setForm((f) => ({ ...f, org: e.target.value }))} list="pf-orgs-m" placeholder="גוף או יחידה (למשל: שם הספק)" aria-label="גוף או יחידה" />
+          <datalist id="pf-orgs-m">{orgs.map((o) => <option key={o} value={o} />)}</datalist>
+          <select value={form.kind} onChange={(e) => setForm((f) => ({ ...f, kind: e.target.value }))} aria-label="שייכות">
+            <option value="internal">פנימי</option>
+            <option value="vendor">ספק</option>
+            <option value="other">גורם חיצוני</option>
+          </select>
+          <button type="submit">הוספה ובחירה</button>
+        </form>
+      )}
+    </div>
+  );
+}
+
 // ---------- עורך פגישה ----------
 function Editor({ meeting, store, list }) {
   const navigate = useNavigate();
-  const team = useList(TEAM_KEY).items;
+  const teamList = useList(TEAM_KEY);
+  const team = teamList.items;
   const decisions = useList(DECISIONS_KEY);
   const [msg, setMsg] = useState('');
   const patch = (p) => list.update(meeting.id, p);
   const project = store.projects.find((p) => p.id === meeting.projectId);
   const ownerName = (id) => team.find((m) => m.id === id)?.name || '';
+  const labelOf = (n) => { const p = team.find((x) => x.name === n); return p?.org ? `${n} (${p.org})` : n; };
   const setAction = (id, p) => patch({ actions: meeting.actions.map((a) => (a.id === id ? { ...a, ...p } : a)) });
-
-  const toggleAttendee = (name) =>
-    patch({ attendees: meeting.attendees.includes(name) ? meeting.attendees.filter((n) => n !== name) : [...meeting.attendees, name] });
-  const [guest, setGuest] = useState('');
-  const addGuest = (e) => {
-    e.preventDefault();
-    const n = guest.trim();
-    if (n && !meeting.attendees.includes(n)) patch({ attendees: [...meeting.attendees, n] });
-    setGuest('');
-  };
 
   const insert = (prefix) => patch({ notes: `${meeting.notes}${meeting.notes && !meeting.notes.endsWith('\n') ? '\n' : ''}${prefix}: ` });
 
   const generate = () => {
-    const r = extract({ title: meeting.title, notes: meeting.notes, transcript: meeting.transcript, attendees: meeting.attendees, team });
+    const r = extract({ title: meeting.title, notes: meeting.notes, transcript: meeting.transcript, attendees: meeting.attendees.map(labelOf), team });
     const keepA = meeting.actions.filter((a) => a.taskId || a.manual);
     const keepD = meeting.decisions.filter((d) => d.logged || d.manual);
     const known = new Set([...keepA.map((a) => a.title), ...keepD.map((d) => d.text)]);
@@ -207,7 +258,7 @@ function Editor({ meeting, store, list }) {
   };
 
   const copy = async () => {
-    try { await navigator.clipboard.writeText(summaryText(meeting, ownerName)); setMsg('הסיכום הועתק. אפשר להדביק במייל.'); } catch { setMsg('ההעתקה נחסמה בדפדפן.'); }
+    try { await navigator.clipboard.writeText(summaryText({ ...meeting, attendees: meeting.attendees.map(labelOf) }, ownerName)); setMsg('הסיכום הועתק. אפשר להדביק במייל.'); } catch { setMsg('ההעתקה נחסמה בדפדפן.'); }
   };
 
   const remove = async () => {
@@ -238,21 +289,7 @@ function Editor({ meeting, store, list }) {
             <input type="date" value={meeting.date} onChange={(e) => patch({ date: e.target.value })} />
           </label>
         </div>
-        <div>
-          <div className="mt-lab">משתתפים</div>
-          <div className="chips">
-            {team.map((m) => (
-              <button key={m.id} type="button" className={`chip${meeting.attendees.includes(m.name) ? ' on' : ''}`} onClick={() => toggleAttendee(m.name)}>{m.name}</button>
-            ))}
-            {meeting.attendees.filter((n) => !team.some((m) => m.name === n)).map((n) => (
-              <button key={n} type="button" className="chip on" onClick={() => toggleAttendee(n)}>{n} ✕</button>
-            ))}
-          </div>
-          <form className="row" onSubmit={addGuest}>
-            <input value={guest} onChange={(e) => setGuest(e.target.value)} placeholder="משתתף נוסף (ספק, אורח)" aria-label="משתתף נוסף" />
-            <button type="submit">הוספה</button>
-          </form>
-        </div>
+        <Attendees meeting={meeting} team={teamList} onChange={(attendees) => patch({ attendees })} />
       </section>
 
       <Recorder meeting={meeting} onPatch={patch} />

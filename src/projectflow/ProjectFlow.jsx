@@ -9,6 +9,7 @@ import ChangeRequests from './ChangeRequests.jsx';
 import Dashboard from './Dashboard.jsx';
 import Decisions from './Decisions.jsx';
 import Meetings, { ProjectMeetings } from './Meetings.jsx';
+import { seedContacts } from './meetings.js';
 import Payments from './Payments.jsx';
 import { TEAM_KEY, useList } from './registers.js';
 import Tasks from './Tasks.jsx';
@@ -755,6 +756,7 @@ function NavIcon({ name }) {
 }
 
 export default function ProjectFlow() {
+  useState(() => seedContacts());
   const store = useProjects();
   const { pathname } = useLocation();
   const section = pathname.replace(/^\/projectflow\/?/, '').split('/')[0];
