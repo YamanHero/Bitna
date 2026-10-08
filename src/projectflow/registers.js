@@ -7,6 +7,7 @@ export const DECISIONS_KEY = 'projectflow.decisions.v1';
 export const CHANGES_KEY = 'projectflow.changes.v1';
 export const PAYMENTS_KEY = 'projectflow.payments.v1';
 export const TEAM_KEY = 'projectflow.team.v1';
+export const MEETINGS_KEY = 'projectflow.meetings.v1';
 
 export const CR_STATUS = [
   { value: 'open', label: 'ממתינה להחלטה' },

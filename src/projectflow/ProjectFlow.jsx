@@ -8,6 +8,7 @@ import Board from './Board.jsx';
 import ChangeRequests from './ChangeRequests.jsx';
 import Dashboard from './Dashboard.jsx';
 import Decisions from './Decisions.jsx';
+import Meetings, { ProjectMeetings } from './Meetings.jsx';
 import Payments from './Payments.jsx';
 import { TEAM_KEY, useList } from './registers.js';
 import Tasks from './Tasks.jsx';
@@ -517,6 +518,7 @@ function Detail({ project, store }) {
 
       <StatusCard project={project} patch={patch} />
       <MilestonesCard project={project} patch={patch} />
+      <ProjectMeetings project={project} />
 
       <div className="pf-detail">
         <div className="stage-col">
@@ -707,6 +709,7 @@ const ICONS = {
   backup: 'M12 4v11m0 0-4-4m4 4 4-4M5 20h14',
   tasks: 'M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2',
   assistant: 'M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8zM18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8z',
+  meetings: 'M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM6 11a6 6 0 0 0 12 0M12 17v4',
   more: 'M5 12h.01M12 12h.01M19 12h.01',
 };
 
@@ -714,8 +717,9 @@ const NAV = [
   ['', 'סקירה', 'dashboard'],
   ['projects', 'פרויקטים', 'projects'],
   ['tasks', 'משימות וצוות', 'tasks'],
+  ['meetings', 'פגישות', 'meetings'],
   ['assistant', 'עוזר', 'assistant', true],
-  ['risks', 'סיכונים', 'risks'],
+  ['risks', 'סיכונים', 'risks', true],
   ['decisions', 'החלטות', 'decisions', true],
   ['changes', 'בקשות שינוי', 'changes', true],
   ['payments', 'תשלומים', 'payments', true],
@@ -793,6 +797,8 @@ export default function ProjectFlow() {
           <Route index element={<Dashboard store={store} />} />
           <Route path="projects" element={<ProjectList store={store} />} />
           <Route path="tasks" element={<Tasks store={store} />} />
+          <Route path="meetings" element={<Meetings store={store} />} />
+          <Route path="meetings/:mid" element={<Meetings store={store} />} />
           <Route path="assistant" element={<Assistant store={store} />} />
                     <Route path="risks" element={<Risks store={store} />} />
           <Route path="decisions" element={<Decisions store={store} />} />

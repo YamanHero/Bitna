@@ -1730,3 +1730,33 @@ button.link{background:none;border:0;color:var(--accent,#2f6bff);padding:0;curso
 .ms-date{font-size:13px;opacity:.85}
 .ms-form{flex-wrap:wrap}.ms-form input[type=text]{flex:1 1 200px;min-width:0}
 @media(max-width:700px){.ov-grid{grid-template-columns:1fr}.ov-health{gap:6px}.ms-list li{grid-template-columns:auto 1fr auto}.ms-list .ms-date{grid-column:2/-1;grid-row:2}}
+
+/* ---- פגישות והקלטה ---- */
+.rec-row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.rec-time{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums}
+.rec-time.live{color:#d23b3b}
+.rec-time.live::before{content:'';display:inline-block;width:12px;height:12px;border-radius:50%;background:#d23b3b;margin-inline-end:10px;animation:recpulse 1.2s infinite}
+@keyframes recpulse{50%{opacity:.25}}
+.rec-btns{display:flex;gap:8px;flex:1 1 220px;justify-content:flex-end}
+.rec-main{min-height:52px;flex:1 1 auto;font-size:16px}
+.stt-toggle{display:flex;gap:10px;align-items:center;font-size:14px}
+.stt-toggle input{width:20px;height:20px}
+.rec-note{margin:0;font-size:12px;opacity:.7;line-height:1.5}
+.rec-audio{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.rec-audio audio{flex:1 1 220px;min-width:0;max-width:100%}
+.mt-form{display:grid;gap:10px}
+.mt-form textarea,.mt-form input,.mt-form select{width:100%;box-sizing:border-box;font:inherit}
+.mt-form .row input{flex:1}
+.mt-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mt-lab{font-weight:700;font-size:14px}
+.mt-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.mt-list li{display:grid;gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line,#dde3ee)}
+.mt-list li.sent{opacity:.7}
+.mt-list li:has(> button){grid-template-columns:1fr auto auto;align-items:center}
+.mt-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.mt-meta select,.mt-meta input{width:auto;flex:1 1 140px}
+.mt-bar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px}
+.mt-bar select{flex:1 1 160px}
+.mt-foot{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 20px}
+.mt-foot button{flex:1 1 auto;min-height:46px}
+@media(max-width:700px){.mt-two{grid-template-columns:1fr}.rec-time{font-size:30px}}
