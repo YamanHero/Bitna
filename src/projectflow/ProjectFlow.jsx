@@ -10,6 +10,7 @@ import Dashboard from './Dashboard.jsx';
 import Decisions from './Decisions.jsx';
 import Meetings, { ProjectMeetings } from './Meetings.jsx';
 import { seedContacts } from './meetings.js';
+import Icon, { NAV_ICONS } from './Icon.jsx';
 import Payments from './Payments.jsx';
 import { TEAM_KEY, useList } from './registers.js';
 import Tasks from './Tasks.jsx';
@@ -767,11 +768,7 @@ function More() {
 }
 
 function NavIcon({ name }) {
-  return (
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d={ICONS[name]} />
-    </svg>
-  );
+  return <Icon name={NAV_ICONS[name] || 'circle'} className="nav-ic" />;
 }
 
 export default function ProjectFlow() {

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { RISKS_KEY, exposure, useList } from './registers.js';
 import { LEVELS, LEVEL_LABEL, dayDiff, forecast, health, milestones, nextMilestone, rel } from './health.js';
+import Icon from './Icon.jsx';
 import { StatusChip, StatusRail } from './StatusCard.jsx';
 import { STATUSES, baseStatus, changeStatus, statusOf } from './status.js';
 import { daysLeft } from './storage.js';
@@ -63,7 +64,7 @@ function Card({ p, h, onAdvance }) {
       </Link>
       {next && next.id !== 'closed' && (
         <button type="button" className="ghost ov-adv" onClick={() => onAdvance(p, next)}>
-          קידום ל"{next.label}"
+          <Icon name="forward-step" /> קידום ל"{next.label}"
         </button>
       )}
     </article>
@@ -117,8 +118,9 @@ export default function Dashboard({ store }) {
   return (
     <>
       <div className="ov-health" role="group" aria-label="סינון לפי מצב">
-        {[['all', 'כל הפעילים', live.length], ['green', 'תקין', count('green')], ['amber', 'דורש מעקב', count('amber')], ['red', 'חריג', count('red')]].map(([id, label, n]) => (
+        {[['all', 'כל הפעילים', live.length, 'layer-group'], ['green', 'תקין', count('green'), 'circle-check'], ['amber', 'דורש מעקב', count('amber'), 'eye'], ['red', 'חריג', count('red'), 'fire']].map(([id, label, n, ic]) => (
           <button key={id} type="button" className={`ov-pill lv-${id}${filter === id ? ' on' : ''}`} onClick={() => setFilter(id)}>
+            <Icon name={ic} className="pill-ic" />
             <b>{n}</b>
             <span>{label}</span>
           </button>
@@ -127,17 +129,17 @@ export default function Dashboard({ store }) {
 
       {attention.length > 0 && filter === 'all' && (
         <section className="ov-attn" aria-label="דורש תשומת לב">
-          <h2 className="pf-h2">דורש תשומת לב עכשיו</h2>
+          <h2 className="pf-h2"><Icon name="bell" /> דורש תשומת לב עכשיו</h2>
           {attention.map(({ p, h }) => (
             <Link key={p.id} to={`/projectflow/${p.id}`} className={`ov-attn-row lv-${h.level}`}>
-              <strong>{p.name}</strong>
+              <strong><Icon name={h.level === 'red' ? 'fire' : 'eye'} /> {p.name}</strong>
               <span>{h.reasons[0]?.text}</span>
             </Link>
           ))}
         </section>
       )}
 
-      <h2 className="pf-h2">הפרויקטים שלי</h2>
+      <h2 className="pf-h2"><Icon name="rocket" /> הפרויקטים שלי</h2>
       <div className="ov-grid">
         {shown.map(({ p, h }) => (
           <Card key={p.id} p={p} h={h} onAdvance={advance} />
@@ -145,7 +147,7 @@ export default function Dashboard({ store }) {
         {shown.length === 0 && <p className="muted">אין פרויקטים במצב הזה.</p>}
       </div>
 
-      <h2 className="pf-h2">אבני דרך קרובות</h2>
+      <h2 className="pf-h2"><Icon name="flag-checkered" /> אבני דרך קרובות</h2>
       {ms.length === 0 ? (
         <p className="muted">אין אבני דרך ב-60 הימים הקרובים. הוסיפו מועדי שלבים או אבני דרך במסך הפרויקט.</p>
       ) : (
@@ -173,7 +175,7 @@ export default function Dashboard({ store }) {
 
       {highRisks > 0 && (
         <Link to="/projectflow/risks" className="ov-risk">
-          {highRisks} סיכונים בחשיפה גבוהה פתוחים · לצפייה במרשם הסיכונים
+          <Icon name="triangle-exclamation" /> {highRisks} סיכונים בחשיפה גבוהה פתוחים · לצפייה במרשם הסיכונים
         </Link>
       )}
 

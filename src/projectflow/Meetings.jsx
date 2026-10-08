@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { DECISIONS_KEY, MEETINGS_KEY, TEAM_KEY, TOPICS_KEY, useList } from './registers.js';
+import Icon from './Icon.jsx';
 import { deleteAudio, extract, getAudio, parseDue, saveAudio, summaryText } from './meetings.js';
 import { currentStage, stagesOf, uid } from './storage.js';
 
@@ -109,19 +110,19 @@ function Recorder({ meeting, onPatch }) {
         <div className="rec-btns">
           {state === 'idle' && (
             <button type="button" className="primary rec-main" onClick={start} disabled={!canRecord}>
-              ● {audioUrl ? 'המשך להקליט' : 'התחלת הקלטה'}
+              <Icon name="circle" className="rec-dot" /> {audioUrl ? 'המשך להקליט' : 'התחלת הקלטה'}
             </button>
           )}
           {state === 'rec' && (
             <>
-              <button type="button" className="ghost rec-main" onClick={pause}>השהיה</button>
-              <button type="button" className="danger rec-main" onClick={stop}>■ סיום</button>
+              <button type="button" className="ghost rec-main" onClick={pause}><Icon name="pause" /> השהיה</button>
+              <button type="button" className="danger rec-main" onClick={stop}><Icon name="stop" /> סיום</button>
             </>
           )}
           {state === 'paused' && (
             <>
-              <button type="button" className="primary rec-main" onClick={resume}>המשך</button>
-              <button type="button" className="danger rec-main" onClick={stop}>■ סיום</button>
+              <button type="button" className="primary rec-main" onClick={resume}><Icon name="play" /> המשך</button>
+              <button type="button" className="danger rec-main" onClick={stop}><Icon name="stop" /> סיום</button>
             </>
           )}
         </div>
@@ -344,7 +345,7 @@ function Editor({ meeting, store, list }) {
           <summary>תמלול הפגישה{meeting.transcript ? ` (${meeting.transcript.split('\n').length} שורות)` : ''}</summary>
           <textarea rows={6} value={meeting.transcript} onChange={(e) => patch({ transcript: e.target.value })} aria-label="תמלול" placeholder="התמלול החי יופיע כאן. אפשר גם להדביק תמלול או להכתיב במקלדת של הטלפון." />
         </details>
-        <button type="button" className="primary" onClick={generate} disabled={!meeting.notes.trim() && !meeting.transcript.trim()}>הפקת סיכום ופעולות</button>
+        <button type="button" className="primary" onClick={generate} disabled={!meeting.notes.trim() && !meeting.transcript.trim()}><Icon name="wand-magic-sparkles" /> הפקת סיכום ופעולות</button>
         {msg && <p className="muted" role="status">{msg}</p>}
       </section>
 
@@ -398,8 +399,8 @@ function Editor({ meeting, store, list }) {
       )}
 
       <div className="mt-foot">
-        <button type="button" className="ghost" onClick={copy}>העתקת הסיכום לשליחה</button>
-        <button type="button" className="danger" onClick={remove}>מחיקת הפגישה</button>
+        <button type="button" className="ghost" onClick={copy}><Icon name="copy" /> העתקת הסיכום לשליחה</button>
+        <button type="button" className="danger" onClick={remove}><Icon name="trash" /> מחיקת הפגישה</button>
       </div>
     </>
   );
@@ -423,7 +424,7 @@ export default function Meetings({ store }) {
   return (
     <>
       <div className="mt-bar">
-        <button type="button" className="primary" onClick={create}>● פגישה חדשה</button>
+        <button type="button" className="primary" onClick={create}><Icon name="microphone" /> פגישה חדשה</button>
         <select value={proj} onChange={(e) => setProj(e.target.value)} aria-label="סינון לפי פרויקט">
           <option value="all">כל הפרויקטים</option>
           {store.projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -465,7 +466,7 @@ export function ProjectMeetings({ project }) {
     <section className="status-card ms-card" aria-label="פגישות הפרויקט">
       <div className="mt-bar">
         <h3 className="ms-title">פגישות</h3>
-        <button type="button" className="ghost sm" onClick={() => navigate(`/projectflow/meetings/${newMeeting(list, project.id)}`)}>● פגישה חדשה</button>
+        <button type="button" className="ghost sm" onClick={() => navigate(`/projectflow/meetings/${newMeeting(list, project.id)}`)}><Icon name="microphone" /> פגישה חדשה</button>
       </div>
       {mine.length === 0 ? (
         <p className="muted">אין פגישות לפרויקט. הקלטה או הערות יהפכו לסיכום ולמשימות.</p>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Icon from './Icon.jsx';
 import { daysLeft } from './storage.js';
 import { dayDiff, milestones, rel } from './health.js';
 import {
@@ -66,12 +67,12 @@ export default function StatusCard({ project, patch }) {
     <section className={`status-card${hold ? ' hold' : ''}`} aria-label="סטטוס הפרויקט">
       <div className="status-top">
         <div>
-          <div className="status-kicker">סטטוס נוכחי</div>
+          <div className="status-kicker"><Icon name="location-crosshairs" /> סטטוס נוכחי</div>
           <h3 className="status-name">{info.label}</h3>
           <p className="status-hint">{hold ? `הוקפא בשלב: ${statusInfo(project.prevStatus || 'prep').label}` : info.hint}</p>
         </div>
         <div className="stopwatch" aria-live="off">
-          <div className="sw-time" dir="ltr">{stopwatch(ms)}</div>
+          <div className="sw-time" dir="ltr"><Icon name="stopwatch" className="sw-ic" /> {stopwatch(ms)}</div>
           <div className="sw-label">
             בסטטוס מאז {fmtDate(st)}{' '}
             <button type="button" className="link" onClick={() => setEditDate((v) => !v)}>שינוי תאריך</button>
@@ -99,17 +100,17 @@ export default function StatusCard({ project, patch }) {
       <div className="status-actions">
         {hold ? (
           <button type="button" className="primary" onClick={() => patch((p) => resume(p))}>
-            המשך מהשלב: {statusInfo(project.prevStatus || 'prep').label}
+            <Icon name="play" /> המשך מהשלב: {statusInfo(project.prevStatus || 'prep').label}
           </button>
         ) : (
           next && (
             <button type="button" className="primary" onClick={() => go(next.id)}>
-              קידום ל"{next.label}"
+              <Icon name="forward-step" /> קידום ל"{next.label}"
             </button>
           )
         )}
         {!hold && s !== 'closed' && (
-          <button type="button" className="ghost" onClick={() => go('hold')}>השהיה</button>
+          <button type="button" className="ghost" onClick={() => go('hold')}><Icon name="pause" /> השהיה</button>
         )}
       </div>
 
@@ -123,7 +124,7 @@ export default function StatusCard({ project, patch }) {
       </div>
 
       <button type="button" className="link" onClick={() => setOpen((v) => !v)}>
-        {open ? 'הסתרת היסטוריה' : 'היסטוריית סטטוסים'}
+        <Icon name="clock-rotate-left" /> {open ? 'הסתרת היסטוריה' : 'היסטוריית סטטוסים'}
       </button>
       {open && (
         <ul className="status-history">
@@ -156,7 +157,7 @@ export function MilestonesCard({ project, patch }) {
   const upd = (id, fn) => patch((p) => ({ ...p, milestones: (p.milestones || []).map((m) => (m.id === id ? fn(m) : m)) }));
   return (
     <section className="status-card ms-card" aria-label="אבני דרך">
-      <h3 className="ms-title">אבני דרך</h3>
+      <h3 className="ms-title"><Icon name="flag-checkered" /> אבני דרך</h3>
       {list.length === 0 && <p className="muted">מועדי השלבים ויעד ההפעלה יופיעו כאן אוטומטית. אפשר גם להוסיף אבן דרך משלכם.</p>}
       <ul className="ms-list">
         {list.map((m) => {
