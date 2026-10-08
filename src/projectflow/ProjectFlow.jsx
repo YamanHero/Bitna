@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, NavLink, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { SyncBadge } from '../lib/AuthGate.jsx';
 import { ThemePicker } from '../lib/theme.jsx';
@@ -13,6 +13,7 @@ import { seedContacts } from './meetings.js';
 import Payments from './Payments.jsx';
 import { TEAM_KEY, useList } from './registers.js';
 import Tasks from './Tasks.jsx';
+import { baseStatus, relevantStageIds, statusInfo } from './status.js';
 import StatusCard, { MilestonesCard, StatusChip, StatusRail } from './StatusCard.jsx';
 import Risks from './Risks.jsx';
 import { STAGES } from './stages.js';
@@ -315,11 +316,20 @@ function Detail({ project, store }) {
   const [bulkText, setBulkText] = useState('');
   const [editing, setEditing] = useState(false);
   const [manage, setManage] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const [customStage, setCustomStage] = useState('');
 
   const today = new Date().toISOString().slice(0, 10);
   const stages = stagesOf(project);
-  const activeId = sel ?? currentStage(project)?.id;
+  const relIds = relevantStageIds(project);
+  const relStages = stages.filter((s) => relIds.includes(s.id) || !catalogStage(s.id));
+  const hasRel = relStages.length > 0 && relStages.length < stages.length;
+  const visible = showAll || !hasRel ? stages : relStages;
+  const relCurrent = relStages.find((s) => {
+    const st = stageStatus(project, s.id);
+    return !st.empty && !st.complete;
+  }) || relStages[0];
+  const activeId = sel ?? (hasRel ? relCurrent?.id : currentStage(project)?.id);
   const active = stages.find((s) => s.id === activeId) ?? stages[stages.length - 1] ?? null;
   const meta = (active && project.stageMeta[active.id]) || {};
   const tasks = active ? project.tasks.filter((t) => t.stage === active.id) : [];
@@ -329,6 +339,9 @@ function Detail({ project, store }) {
   const activeDone = active ? stageStatus(project, active.id).complete : false;
 
   const patch = (fn) => store.update(project.id, fn);
+  // שינוי סטטוס: חוזרים לתצוגת השלבים של הסטטוס החדש.
+  const stKey = baseStatus(project);
+  useEffect(() => { setSel(null); setShowAll(false); }, [stKey]);
 
   // ---- משימות ----
   const toggle = (id) =>
@@ -524,7 +537,7 @@ function Detail({ project, store }) {
       <div className="pf-detail">
         <div className="stage-col">
           <div className="stage-head">
-            <h3>משימות לפי שלב ({stages.length})</h3>
+            <h3>{hasRel && !showAll ? `שלבי "${statusInfo(stKey).label}"` : 'כל השלבים'} ({visible.length})</h3>
             <button type="button" className="ghost sm" onClick={() => setManage((v) => !v)}>
               {manage ? 'סיום' : 'התאמת שלבים'}
             </button>
@@ -533,6 +546,7 @@ function Detail({ project, store }) {
           {!manage && (
           <ol className="stage-list">
             {stages.map((s, i) => {
+              if (!visible.includes(s)) return null;
               const st = stageStatus(project, s.id);
               const due = project.stageMeta[s.id]?.due;
               const late = due && due < today && !st.complete;
@@ -556,6 +570,11 @@ function Detail({ project, store }) {
             })}
             {stages.length === 0 && <li className="muted">אין שלבים. הוסיפו שלב כדי להתחיל.</li>}
           </ol>
+          )}
+          {!manage && hasRel && (
+            <button type="button" className="link" onClick={() => setShowAll((v) => !v)}>
+              {showAll ? `הצגת שלבי "${statusInfo(stKey).label}" בלבד` : `הצגת כל השלבים (${stages.length})`}
+            </button>
           )}
 
           {manage && (

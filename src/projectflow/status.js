@@ -120,3 +120,19 @@ export function history(project, now = Date.now()) {
 }
 
 export const daysIn = (project, now = Date.now()) => Math.floor((now - since(project).getTime()) / MS.day);
+
+// השלבים (מהקטלוג הסטנדרטי) שרלוונטיים לכל סטטוס. שלבים אישיים מוצגים תמיד.
+export const STATUS_STAGES = {
+  prep: ['needs', 'budget', 'tender_docs'],
+  tender: ['publication', 'clarifications', 'bids'],
+  selection: ['evaluation', 'approval'],
+  contract: ['contract'],
+  spec: ['delivery'],
+  dev: ['delivery'],
+  test: ['acceptance'],
+  golive: ['acceptance', 'closure'],
+  warranty: ['closure'],
+  closed: ['closure'],
+};
+
+export const relevantStageIds = (project) => STATUS_STAGES[baseStatus(project)] || [];
