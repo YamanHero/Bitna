@@ -1825,7 +1825,7 @@ body {
 
 /* כפתורים */
 button { transition: transform 0.18s var(--ease), box-shadow 0.25s var(--ease), filter 0.2s, background 0.2s; }
-button:not(.ghost):not(.danger):not(.link):not(.chip):not(.swatch):not(.ov-pill):not(.att-org):not(.icon-btn) {
+button:where(:not(.ghost, .danger, .link, .chip, .swatch, .ov-pill, .att-org, .icon-btn)) {
   background: var(--grad);
   border-color: transparent;
   color: #fff;
@@ -1889,17 +1889,17 @@ button i, a i { margin-inline-end: 6px; }
 .rec-time.live ~ .rec-btns .rec-dot { animation: blink 1s infinite; }
 
 /* כניסה מדורגת */
-.pf-main > :not(h1) { animation: rise 0.5s var(--ease) both; }
-.ov-grid > *, .pf-list > *, .pf-rows > *, .ov-timeline > *, .ov-attn > *, .stage-list > *, .more-list > * { animation: rise 0.5s var(--ease) both; }
+.pf-main > :not(h1) { animation: rise 0.5s var(--ease) backwards; }
+.ov-grid > *, .pf-list > *, .pf-rows > *, .ov-timeline > *, .ov-attn > *, .stage-list > *, .more-list > * { animation: rise 0.5s var(--ease) backwards; }
 :is(.ov-grid, .pf-list, .pf-rows, .ov-timeline, .ov-attn, .stage-list, .more-list) > :nth-child(2) { animation-delay: 0.05s; }
 :is(.ov-grid, .pf-list, .pf-rows, .ov-timeline, .ov-attn, .stage-list, .more-list) > :nth-child(3) { animation-delay: 0.1s; }
 :is(.ov-grid, .pf-list, .pf-rows, .ov-timeline, .ov-attn, .stage-list, .more-list) > :nth-child(4) { animation-delay: 0.15s; }
 :is(.ov-grid, .pf-list, .pf-rows, .ov-timeline, .ov-attn, .stage-list, .more-list) > :nth-child(5) { animation-delay: 0.2s; }
 :is(.ov-grid, .pf-list, .pf-rows, .ov-timeline, .ov-attn, .stage-list, .more-list) > :nth-child(n + 6) { animation-delay: 0.25s; }
-.ov-health .ov-pill { animation: pop 0.55s var(--ease) both; }
+.ov-health .ov-pill { animation: pop 0.55s var(--ease) backwards; }
 .ov-health .ov-pill:nth-child(2) { animation-delay: 0.06s; } .ov-health .ov-pill:nth-child(3) { animation-delay: 0.12s; } .ov-health .ov-pill:nth-child(4) { animation-delay: 0.18s; }
-.toast { animation: slideup 0.4s var(--ease) both; }
-.stage-picker, .att-add { animation: rise 0.35s var(--ease) both; }
+.toast { animation: slideup 0.4s var(--ease) backwards; }
+.stage-picker, .att-add { animation: rise 0.35s var(--ease) backwards; }
 
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @keyframes pop { 0% { opacity: 0; transform: scale(0.85); } 60% { transform: scale(1.06); } 100% { opacity: 1; transform: none; } }
@@ -1912,3 +1912,110 @@ button i, a i { margin-inline-end: 6px; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 .ov-main > .status-chip { justify-self: start; }
+
+/* =====================================================================
+   מערכת כפתורים אחידה + התאמה לאייפון 17 Pro Max (440×956)
+   ===================================================================== */
+button {
+  min-height: 46px;
+  border-radius: 14px;
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  line-height: 1.2;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+button:where(:not(.ghost, .danger, .link, .chip, .swatch, .ov-pill, .att-org, .icon-btn)) {
+  box-shadow: var(--glow), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+button.ghost {
+  background: var(--surface);
+  border: 1.5px solid color-mix(in srgb, var(--accent) 38%, var(--line));
+  color: var(--accent-ink);
+  box-shadow: none;
+}
+button.ghost:hover:not(:disabled) { background: var(--accent-soft); filter: none; }
+button.danger {
+  background: var(--red-soft);
+  border: 1.5px solid transparent;
+  color: var(--red);
+  box-shadow: none;
+}
+button.danger:hover:not(:disabled) { background: color-mix(in srgb, var(--red) 18%, var(--red-soft)); filter: none; }
+button.sm { min-height: 40px; padding: 6px 14px; font-size: 14px; border-radius: 12px; }
+button.icon-btn { min-width: 44px; min-height: 44px; padding: 0; border-radius: 12px; }
+button.link {
+  min-height: 44px;
+  padding: 0 4px;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  color: var(--accent-ink);
+  text-decoration: none;
+  font-weight: 700;
+}
+button.link:hover:not(:disabled) { transform: none; text-decoration: underline; filter: none; }
+.chip { min-height: 44px; padding: 8px 16px; display: inline-flex; align-items: center; }
+.seg, .tabs2 { padding: 4px; border-radius: 16px; background: var(--surface-2); border: 1px solid var(--line); }
+.seg button, .tabs2 button {
+  min-height: 44px;
+  border-radius: 12px;
+  background: transparent;
+  border-color: transparent;
+  color: var(--muted);
+  box-shadow: none;
+}
+.seg button.on, .tabs2 button.on, .seg button[aria-selected='true'], .tabs2 button[aria-selected='true'] {
+  background: var(--grad);
+  color: #fff;
+  box-shadow: var(--glow);
+}
+.stage-btn { border-radius: 14px; }
+.stage-btn.active { background: var(--accent-soft); color: var(--accent-ink); border-color: var(--accent); box-shadow: inset 4px 0 0 var(--accent); }
+:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 55%, transparent); outline-offset: 2px; }
+button:disabled { filter: grayscale(0.4); box-shadow: none !important; }
+
+@media (max-width: 700px) {
+  html { -webkit-text-size-adjust: 100%; }
+  body { overscroll-behavior-y: none; }
+  /* iOS מגדיל את המסך בהקלדה בשדות קטנים מ-16px */
+  input, select, textarea { font-size: 16px; min-height: 46px; border-radius: 12px; }
+  textarea { min-height: 96px; }
+  input[type='checkbox'], input[type='radio'] { min-height: 0; }
+  .pf-main { padding-inline: calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-left)); }
+  .pf-page { font-size: 1.9rem; margin-bottom: 14px; }
+  form button[type='submit'], .pf-form button { width: 100%; }
+  .row { flex-wrap: wrap; }
+  .row > input { flex: 1 1 100%; }
+  .row > button { flex: 1 1 auto; }
+  .pf-nav { gap: 2px; }
+  .pf-nav a { min-height: 54px; border-radius: 16px; }
+  .fab {
+    white-space: nowrap;
+    min-height: 54px;
+    padding: 0 22px;
+    font-size: 16px;
+    bottom: calc(86px + env(safe-area-inset-bottom));
+  }
+  .toast { bottom: calc(92px + env(safe-area-inset-bottom)); }
+  .status-actions button, .ov-adv, .mt-foot button { min-height: 52px; font-size: 16px; }
+  .ov-pill { min-height: 76px; border-radius: 18px; }
+  .ov-card, .status-card { border-radius: 20px; padding: 16px; }
+  .task-meta select, .task-meta input { flex: 1 1 100%; }
+}
+
+/* מסכים רחבים בטלפון (כמו 440px): מרווח נינוח יותר */
+@media (min-width: 420px) and (max-width: 700px) {
+  .pf-main { padding-top: 22px; }
+  .ov-grid, .pf-list, .pf-rows { gap: 14px; }
+  .ov-pill b { font-size: 28px; }
+}
+@media (max-width: 700px) {
+  .fab { width: max-content; display: inline-flex; }
+}
+@media (max-width: 700px) {
+  .pf-main a:not([class]), .pf-main a.ai-link { display: inline-block; padding-block: 12px; margin-block: -12px; }
+}

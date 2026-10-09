@@ -213,7 +213,7 @@ function ProjectList({ store }) {
         </div>
         {!adding && (
           <button type="button" className="fab" onClick={() => setAdding(true)}>
-            פרויקט חדש
+            <Icon name="plus" /> פרויקט חדש
           </button>
         )}
       </div>
