@@ -118,8 +118,24 @@ export default function AuthGate({ children }) {
   return children;
 }
 
+function useOnline() {
+  const [on, setOn] = useState(() => (typeof navigator === 'undefined' ? true : navigator.onLine));
+  useEffect(() => {
+    const up = () => setOn(true);
+    const down = () => setOn(false);
+    window.addEventListener('online', up);
+    window.addEventListener('offline', down);
+    return () => {
+      window.removeEventListener('online', up);
+      window.removeEventListener('offline', down);
+    };
+  }, []);
+  return on;
+}
+
 export function SyncBadge() {
   const s = useSync();
+  const online = useOnline();
   const onLogout = () => {
     const warn = hasUnsynced()
       ? 'יש שינויים שעוד לא נשמרו בענן. ננסה לשמור אותם לפני היציאה. הנתונים יימחקו מהדפדפן הזה. להמשיך?'
@@ -136,8 +152,9 @@ export function SyncBadge() {
       </div>
     );
   }
-  const text =
-    s.phase === 'saving' ? 'שומר…' : s.phase === 'error' ? 'השמירה בענן נכשלה' : 'נשמר בענן';
+  const text = !online
+    ? 'לא מקוון · השינויים נשמרים במכשיר ויסונכרנו כשהחיבור יחזור'
+    : s.phase === 'saving' ? 'שומר…' : s.phase === 'error' ? 'השמירה בענן נכשלה' : 'נשמר בענן';
   return (
     <div className={`sync ${s.phase}`} role="status">
       <span className="sync-line">
