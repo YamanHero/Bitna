@@ -2030,9 +2030,11 @@ button:disabled { filter: grayscale(0.4); box-shadow: none !important; }
 .empty-rich p { margin: 0; }
 .empty-ic { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 20px; background: var(--grad); color: #fff; font-size: 28px; box-shadow: var(--glow); animation: pop 0.6s var(--ease); }
 @media (max-width: 820px) {
-  .pf-side { background: color-mix(in srgb, var(--side) 78%, transparent); -webkit-backdrop-filter: blur(16px) saturate(160%); backdrop-filter: blur(16px) saturate(160%); }
-  .pf-nav { -webkit-backdrop-filter: blur(16px) saturate(160%); backdrop-filter: blur(16px) saturate(160%); }
+  /* הזכוכית על שכבה נפרדת: backdrop-filter על ההורה היה "תופס" את התפריט התחתון הקבוע ומעלים אותו */
+  .pf-side { background: transparent; isolation: isolate; }
+  .pf-side::before { content: ""; position: absolute; inset: 0; z-index: -1; background: color-mix(in srgb, var(--side) 80%, transparent); -webkit-backdrop-filter: blur(16px) saturate(160%); backdrop-filter: blur(16px) saturate(160%); }
+  .pf-nav { background: color-mix(in srgb, var(--side) 88%, transparent); -webkit-backdrop-filter: blur(16px) saturate(160%); backdrop-filter: blur(16px) saturate(160%); }
 }
-.qk { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--accent); font-weight: 600; text-decoration: none !important; transition: transform 0.2s var(--ease); }
+.qk { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--accent); font-weight: 600; text-decoration: none !important; transition: transform 0.2s var(--ease); }
 .qk:active { transform: scale(0.96); }
 .qk.pri { background: var(--grad); color: #fff; border-color: transparent; box-shadow: var(--glow); }
