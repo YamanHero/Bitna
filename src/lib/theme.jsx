@@ -24,6 +24,9 @@ function read() {
 export function applyTheme(id) {
   if (id === 'blue') document.documentElement.removeAttribute('data-theme');
   else document.documentElement.setAttribute('data-theme', id);
+  const t = THEMES.find((x) => x.id === id);
+  const m = document.querySelector('meta[name="theme-color"]');
+  if (t && m) m.setAttribute('content', t.color);
 }
 
 // מיישם את הצבע השמור מיד בטעינה, לפני שהמסך מצויר.

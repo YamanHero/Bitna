@@ -109,14 +109,33 @@ export default function Dashboard({ store }) {
 
   if (store.projects.length === 0) {
     return (
-      <p className="pf-empty">
-        אין פרויקטים עדיין. <Link to="/projectflow/projects">פתחו פרויקט ראשון</Link> והסקירה תתמלא מעצמה.
-      </p>
+      <div className="pf-empty empty-rich">
+        <span className="empty-ic"><Icon name="tower-observation" /></span>
+        <h3>ברוכים הבאים למגדל הבקרה</h3>
+        <p>אין פרויקטים עדיין. פתחו פרויקט ראשון והסקירה תתמלא מעצמה.</p>
+        <Link to="/projectflow/projects" className="qk pri">פרויקט חדש</Link>
+      </div>
     );
   }
 
+  const hr = new Date().getHours();
+  const greet = hr < 5 ? 'לילה טוב' : hr < 12 ? 'בוקר טוב' : hr < 18 ? 'צהריים טובים' : 'ערב טוב';
+  const red = count('red');
+  const amber = count('amber');
+  const sub = live.length === 0 ? 'אין פרויקטים פעילים' : red + amber === 0 ? `${live.length} פרויקטים פעילים, הכול תקין` : `${live.length} פרויקטים פעילים · ${red ? `${red} חריגים` : ''}${red && amber ? ' · ' : ''}${amber ? `${amber} למעקב` : ''}`;
+
   return (
     <>
+      <div className="ov-hello">
+        <div>
+          <h2>{greet} 👋</h2>
+          <p>{sub}</p>
+        </div>
+        <div className="ov-quick">
+          <Link to="/projectflow/meetings" className="qk"><Icon name="microphone" /> פגישה</Link>
+          <Link to="/projectflow/projects" className="qk pri"><Icon name="plus" /> פרויקט</Link>
+        </div>
+      </div>
       <div className="ov-health" role="group" aria-label="סינון לפי מצב">
         {[['all', 'כל הפעילים', live.length, 'layer-group'], ['green', 'תקין', count('green'), 'circle-check'], ['amber', 'דורש מעקב', count('amber'), 'eye'], ['red', 'חריג', count('red'), 'fire']].map(([id, label, n, ic]) => (
           <button key={id} type="button" className={`ov-pill lv-${id}${filter === id ? ' on' : ''}`} onClick={() => setFilter(id)}>

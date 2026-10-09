@@ -781,7 +781,7 @@ export default function ProjectFlow() {
     <div className="pf">
       <aside className="pf-side">
         <Link to="/" className="pf-brand" aria-label="ביתנא, דף הבית">
-          <img src="/favicon.svg" alt="" width="36" height="36" />
+          <img src="/tower.svg" alt="" width="36" height="36" />
           <span>
             <strong>מגדל בקרה</strong>
             <small>ממכרז ועד אספקה</small>

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="מגדל בקרה">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f4623a"/><stop offset=".55" stop-color="#e8453c"/><stop offset="1" stop-color="#b8247f"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".3" cy=".18" r=".8">
+      <stop offset="0" stop-color="#ffd27a" stop-opacity=".75"/><stop offset=".6" stop-color="#ffd27a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tw" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#ffe3d6"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#3a1840"/><stop offset="1" stop-color="#5a1f4f"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="112" fill="url(#glow)"/>
+  <g >
+    <!-- אותות רדאר -->
+    <g fill="none" stroke="#fff" stroke-linecap="round">
+      <path d="M205 108a72 72 0 0 1 0 -52" stroke-width="15" opacity=".95" transform="translate(0 20)"/>
+      <path d="M307 108a72 72 0 0 0 0 -52" stroke-width="15" opacity=".95" transform="translate(0 20)"/>
+      <path d="M178 118a110 110 0 0 1 0 -72" stroke-width="13" opacity=".5" transform="translate(0 20)"/>
+      <path d="M334 118a110 110 0 0 0 0 -72" stroke-width="13" opacity=".5" transform="translate(0 20)"/>
+    </g>
+    <!-- אנטנה -->
+    <rect x="251" y="92" width="10" height="64" rx="5" fill="#fff"/>
+    <circle cx="256" cy="86" r="15" fill="#ffd27a"/>
+    <!-- גג -->
+    <rect x="132" y="150" width="248" height="26" rx="13" fill="#fff"/>
+    <!-- תא פיקוח -->
+    <path d="M146 176h220l-34 74H180z" fill="url(#tw)"/>
+    <path d="M168 190h176l-23 46H191z" fill="url(#glass)"/>
+    <path d="M227 190l-6 46M285 190l6 46" stroke="#ffffff" stroke-opacity=".28" stroke-width="5"/>
+    <path d="M178 218h156" stroke="#ffd27a" stroke-width="6" stroke-linecap="round" opacity=".9"/>
+    <!-- גוף המגדל -->
+    <path d="M226 250h60l20 188H206z" fill="url(#tw)"/>
+    <path d="M221 306h70M214 366h84" stroke="#e8453c" stroke-opacity=".35" stroke-width="9" stroke-linecap="round"/>
+    <!-- בסיס -->
+    <rect x="162" y="430" width="188" height="28" rx="14" fill="#fff"/>
+  </g>
+</svg>
