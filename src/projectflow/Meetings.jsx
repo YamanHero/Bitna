@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { DECISIONS_KEY, MEETINGS_KEY, TEAM_KEY, TOPICS_KEY, useList } from './registers.js';
 import Icon from './Icon.jsx';
-import { deleteAudio, extract, getAudio, parseDue, saveAudio, summaryText } from './meetings.js';
+import { accessToken } from '../lib/cloud.js';
+import { aiAvailable, aiSummarize, deleteAudio, extract, getAudio, parseDue, saveAudio, summaryText } from './meetings.js';
 import { currentStage, stagesOf, uid } from './storage.js';
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -260,6 +261,37 @@ function Editor({ meeting, store, list }) {
 
   const insert = (prefix) => patch({ notes: `${meeting.notes}${meeting.notes && !meeting.notes.endsWith('\n') ? '\n' : ''}${prefix}: ` });
 
+  const [ai, setAi] = useState(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => { aiAvailable().then(setAi); }, []);
+
+  const merge = (r, label) => {
+    const keepA = meeting.actions.filter((a) => a.taskId || a.manual);
+    const keepD = meeting.decisions.filter((d) => d.logged || d.manual);
+    const known = new Set([...keepA.map((a) => a.title), ...keepD.map((d) => d.text)]);
+    patch({
+      summary: r.summary,
+      actions: [...keepA, ...r.actions.filter((a) => !known.has(a.title))],
+      decisions: [...keepD, ...r.decisions.filter((d) => !known.has(d.text))],
+    });
+    setMsg(`${label}: סיכום, ${r.actions.length} פעולות ו-${r.decisions.length} החלטות. עברו עליהן ותקנו לפי הצורך.`);
+  };
+
+  const generateAi = async () => {
+    setBusy(true);
+    setMsg('');
+    try {
+      const token = await accessToken();
+      if (!token) throw Object.assign(new Error('צריך להתחבר לחשבון כדי להשתמש בסיכום חכם.'), { code: 'auth' });
+      const r = await aiSummarize({ token, title: meeting.title, project: project?.name, attendees: meeting.attendees.map(labelOf), notes: meeting.notes, transcript: meeting.transcript, team });
+      merge(r, 'סוכם בבינה מלאכותית');
+    } catch (e) {
+      setMsg(`${e.message} אפשר להשתמש בהפקה הרגילה.`);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const generate = () => {
     const r = extract({ title: meeting.title, notes: meeting.notes, transcript: meeting.transcript, attendees: meeting.attendees.map(labelOf), team });
     const keepA = meeting.actions.filter((a) => a.taskId || a.manual);
@@ -345,7 +377,18 @@ function Editor({ meeting, store, list }) {
           <summary>תמלול הפגישה{meeting.transcript ? ` (${meeting.transcript.split('\n').length} שורות)` : ''}</summary>
           <textarea rows={6} value={meeting.transcript} onChange={(e) => patch({ transcript: e.target.value })} aria-label="תמלול" placeholder="התמלול החי יופיע כאן. אפשר גם להדביק תמלול או להכתיב במקלדת של הטלפון." />
         </details>
-        <button type="button" className="primary" onClick={generate} disabled={!meeting.notes.trim() && !meeting.transcript.trim()}><Icon name="wand-magic-sparkles" /> הפקת סיכום ופעולות</button>
+        <div className="mt-gen">
+          {ai && (
+            <button type="button" className="primary" onClick={generateAi} disabled={busy || (!meeting.notes.trim() && !meeting.transcript.trim())}>
+              <Icon name="wand-magic-sparkles" /> {busy ? 'מסכם…' : 'סיכום חכם (AI)'}
+            </button>
+          )}
+          <button type="button" className={ai ? 'ghost' : 'primary'} onClick={generate} disabled={busy || (!meeting.notes.trim() && !meeting.transcript.trim())}>
+            <Icon name="list-check" /> {ai ? 'הפקה מהירה בלי AI' : 'הפקת סיכום ופעולות'}
+          </button>
+        </div>
+        {ai && <p className="muted small">סיכום חכם שולח את ההערות והתמלול לשירות Claude של Anthropic דרך השרת שלכם. אל תשלחו מידע מסווג.</p>}
+        {ai === false && <p className="muted small">סיכום חכם (AI) אינו מופעל בשרת. ההפקה הרגילה מזהה משימות והחלטות לפי כללים.</p>}
         {msg && <p className="muted" role="status">{msg}</p>}
       </section>
 

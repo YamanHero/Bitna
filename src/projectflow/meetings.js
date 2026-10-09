@@ -182,3 +182,48 @@ export function seedContacts() {
     localStorage.setItem('pfui.contactsSeeded', '1');
   } catch { /* ignore */ }
 }
+
+// ---------- סיכום באמצעות בינה מלאכותית (Claude, דרך פונקציית שרת) ----------
+export async function aiAvailable() {
+  try {
+    const r = await fetch('/api/summarize');
+    if (!r.ok) return false;
+    return Boolean((await r.json()).configured);
+  } catch {
+    return false;
+  }
+}
+
+const matchOwner = (name, team) => {
+  const n = (name || '').trim();
+  if (!n) return '';
+  const hit = team.find((m) => m.name === n) || team.find((m) => m.name && (n.includes(m.name) || m.name.includes(n))) || team.find((m) => m.name && n.split(/\s+/)[0] === m.name.split(/\s+/)[0]);
+  return hit ? hit.id : '';
+};
+
+export async function aiSummarize({ token, title, project, attendees, notes, transcript, team }) {
+  let r;
+  try {
+    r = await fetch('/api/summarize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ title, project, attendees, notes, transcript, today: new Date().toISOString().slice(0, 10) }),
+    });
+  } catch {
+    const e = new Error(navigator.onLine ? 'לא הצלחנו להגיע לשרת.' : 'אין חיבור לאינטרנט. סיכום חכם דורש חיבור.');
+    e.code = 'network';
+    throw e;
+  }
+  let j = {};
+  try { j = await r.json(); } catch { /* ignore */ }
+  if (!r.ok) {
+    const e = new Error(j.error || 'הסיכום החכם נכשל.');
+    e.code = j.code || r.status;
+    throw e;
+  }
+  return {
+    summary: j.summary,
+    decisions: j.decisions.map((text) => ({ id: uid(), text, ai: true })),
+    actions: j.actions.map((a) => ({ id: uid(), title: a.title, owner: matchOwner(a.owner, team), ownerText: a.owner, due: a.due, suggested: false, ai: true })),
+  };
+}

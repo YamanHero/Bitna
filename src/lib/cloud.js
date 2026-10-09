@@ -328,6 +328,8 @@ async function reconcile() {
 
 // ---------- ממשק ציבורי ----------
 
+export const accessToken = () => getToken().catch(() => null);
+
 export const isConfigured = Boolean(SUPABASE_URL && SUPABASE_KEY);
 
 export async function init() {

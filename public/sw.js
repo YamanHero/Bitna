@@ -3,7 +3,7 @@
    - ניווט: קודם הרשת, ואם אין חיבור, הגרסה השמורה.
    - קבצים עם גיבוב בשם (assets) ואייקונים: מהמטמון קודם.
    - בקשות לשרתים אחרים (Supabase) לא נוגעים בהן. */
-const VERSION = 'pf-v1';
+const VERSION = 'pf-v2';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/tower.svg', '/favicon.svg', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png'];
 
 async function precache() {
@@ -44,7 +44,7 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  if (url.origin !== self.location.origin) return;
+  if (url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
 
   if (req.mode === 'navigate') {
     e.respondWith(
