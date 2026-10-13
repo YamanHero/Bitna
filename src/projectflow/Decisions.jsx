@@ -66,10 +66,25 @@ export default function Decisions({ store }) {
               </div>
               <div className="pf-meta">
                 {projectName(d.projectId) && <span>{projectName(d.projectId)}</span>}
+                {d.status === 'pending' && <span className="ag-tag">ממתינה להכרעה</span>}
+                {d.source === 'agent' && <span>הוצע ע״י הסוכן</span>}
                 {d.decidedBy && <span>הוחלט ע״י: {d.decidedBy}</span>}
               </div>
               {d.decision && <p className="pf-note">{d.decision}</p>}
               <div className="row">
+                {d.status === 'pending' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const decision = window.prompt('מה הוחלט?', d.decision || '');
+                      if (decision === null) return;
+                      const decidedBy = window.prompt('מי החליט (גורם מוסמך)?', d.decidedBy || '') || '';
+                      decisions.update(d.id, { status: 'decided', decision, decidedBy, date: today() });
+                    }}
+                  >
+                    תיעוד הכרעה
+                  </button>
+                )}
                 <button
                   type="button"
                   className="danger"

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { SyncBadge } from '../lib/AuthGate.jsx';
 import { ThemePicker } from '../lib/theme.jsx';
+import Agent from './Agent.jsx';
 import Assistant from './Assistant.jsx';
 import Backup from './Backup.jsx';
 import Board from './Board.jsx';
@@ -739,6 +740,7 @@ const NAV = [
   ['projects', 'פרויקטים', 'projects'],
   ['tasks', 'משימות וצוות', 'tasks'],
   ['meetings', 'פגישות', 'meetings'],
+  ['agent', 'סוכן', 'agent'],
   ['assistant', 'עוזר', 'assistant', true],
   ['risks', 'סיכונים', 'risks', true],
   ['decisions', 'החלטות', 'decisions', true],
@@ -817,6 +819,7 @@ export default function ProjectFlow() {
           <Route path="tasks" element={<Tasks store={store} />} />
           <Route path="meetings" element={<Meetings store={store} />} />
           <Route path="meetings/:mid" element={<Meetings store={store} />} />
+          <Route path="agent" element={<Agent store={store} />} />
           <Route path="assistant" element={<Assistant store={store} />} />
                     <Route path="risks" element={<Risks store={store} />} />
           <Route path="decisions" element={<Decisions store={store} />} />

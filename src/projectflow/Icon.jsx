@@ -8,6 +8,7 @@ export const NAV_ICONS = {
   projects: 'folder-open',
   tasks: 'list-check',
   meetings: 'microphone-lines',
+  agent: 'robot',
   assistant: 'wand-magic-sparkles',
   risks: 'triangle-exclamation',
   decisions: 'gavel',

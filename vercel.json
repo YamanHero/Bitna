@@ -1,5 +1,5 @@
 {
-  "functions": { "api/summarize.js": { "maxDuration": 60 } },
+  "functions": { "api/summarize.js": { "maxDuration": 60 }, "api/agent.js": { "maxDuration": 120 } },
   "headers": [
     { "source": "/sw.js", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
   ],

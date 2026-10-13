@@ -2041,3 +2041,77 @@ button:disabled { filter: grayscale(0.4); box-shadow: none !important; }
 .mt-gen { display: flex; flex-wrap: wrap; gap: 10px; }
 .mt-gen > button { flex: 1 1 180px; }
 .muted.small { font-size: 0.82rem; margin: 4px 0 0; }
+
+/* ---------- סוכן Elections Project Manager 360 ---------- */
+
+.ag { display: grid; gap: 12px; padding-bottom: 8px; }
+.ag-head h2 { margin-bottom: 4px; }
+.ag-head .pf-toolbar { flex-wrap: wrap; margin: 10px 0 0; }
+.ag-head select { max-width: 100%; }
+.ag-setup {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px dashed var(--accent);
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+}
+.ag-setup p { margin: 0; }
+.ag-docs { display: grid; gap: 8px; margin-top: 12px; }
+.ag-docs textarea, .ag-input textarea { width: 100%; font: inherit; resize: vertical; }
+.ag-file { cursor: pointer; padding: 8px 14px; border: 1px solid var(--line); border-radius: var(--radius); }
+.ag-warn { margin: 8px 0 0; color: var(--red); font-weight: 700; }
+.ag-chat { display: grid; gap: 10px; }
+.ag-quick { display: flex; flex-wrap: wrap; gap: 8px; }
+.ag-quick button { text-align: start; white-space: normal; }
+.ag-msg {
+  max-width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  overflow-wrap: anywhere;
+}
+.ag-msg p { margin: 0 0 6px; }
+.ag-user { justify-self: start; max-width: 85%; background: var(--accent-soft); border-color: transparent; }
+.ag-assistant { box-shadow: var(--shadow); }
+.ag-rich .ag-h { margin: 10px 0 6px; font-size: 1rem; }
+.ag-rich .ag-h:first-child { margin-top: 0; }
+.ag-ul { margin: 0 0 8px; padding-inline-start: 20px; display: grid; gap: 4px; }
+.ag-props { display: grid; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+.ag-prop {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.ag-prop > div:first-child { flex: 1 1 220px; }
+.ag-prop.added { border-color: var(--green); }
+.ag-prop.dismissed { opacity: 0.55; }
+.ag-tag {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.ag-busy { margin: 0; }
+.ag-input {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  padding: 8px 0;
+  background: var(--bg, transparent);
+}
+@media (max-width: 860px) {
+  .ag-input { bottom: calc(72px + env(safe-area-inset-bottom)); }
+}
